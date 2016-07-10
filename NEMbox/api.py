@@ -390,7 +390,6 @@ class NetEase(object):
     def top_songlist(self, idx=0, offset=0, limit=100):
         # action = 'http://music.163.com' + top_list_all[idx][1]
         action = "http://y.qq.com/#type=toplist&p=top_" + str(top_list_all[idx][1])
-        print(action)
         try:
             connection = requests.get(action,
                                       headers=self.header,
@@ -454,8 +453,8 @@ class NetEase(object):
         resp = self.session.request('GET', url)
         song_data = re.findall(r"g_SongData\s?=\s?(\{.+\})", resp.content)
         if not song_data:
-            print("Cannot retrieve song info")  # TODO:empty info
-            print("Resp is " + resp.content)
+            # print("Cannot retrieve song info")  # TODO:empty info
+            # print("Resp is " + resp.content)
             return {}
         song_data = song_data[0]
         song_data = json.loads(song_data)
@@ -477,7 +476,6 @@ class NetEase(object):
             resp = self.session.request('GET', action,headers=headers)
             json_body = resp.content.split('(')[1].strip(")")
             result = json.loads(json_body)
-            print(result)
             if not result or result['retcode']!=0:
                 lyric_info = '未找到歌词'
             else:
@@ -488,6 +486,7 @@ class NetEase(object):
             return []
 
     def song_tlyric(self, music_id):
+        return []# TODO:lyric translation
         action = 'http://music.163.com/api/song/lyric?os=osx&id={}&lv=-1&kv=-1&tv=-1'.format(  # NOQA
                                                                                                music_id)
         try:
