@@ -161,7 +161,7 @@ class Ui(object):
         if 'lyric' not in song.keys() or len(song['lyric']) <= 0:
             self.now_lyric = '暂无歌词 ~>_<~ \n'
             if dbus_activity and self.config.get_item('osdlyrics'):
-                self.now_playing = song['song_name'] + ' - ' + song[
+                self.now_playing = song['songname'] + ' - ' + song[
                     'artist'] + '\n'
 
         else:
@@ -234,8 +234,8 @@ class Ui(object):
                                            self.indented_startcol, lead,
                                            curses.color_pair(2))
                         name = '{}{}{}  < {} >'.format(
-                            datalist[i]['song_name'], self.space,
-                            datalist[i]['artist'], datalist[i]['album_name'])
+                            datalist[i]['songname'], self.space,
+                            datalist[i]['artist'], datalist[i]['albumname'])
 
                         # the length decides whether to scoll
                         if truelen(name) < self.x - self.startcol - 1:
@@ -255,7 +255,7 @@ class Ui(object):
                         self.screen.addstr(
                             i - offset + 8, self.startcol,
                             '{}. {}{}{}  < {} >'.format(
-                                i, datalist[i]['song_name'], self.space,
+                                i, datalist[i]['songname'], self.space,
                                 datalist[i]['artist'],
                                 datalist[i]['album_name'])[:int(self.x * 2)])
 
@@ -345,12 +345,12 @@ class Ui(object):
                     if i == index:
                         self.screen.addstr(
                             i - offset + 8, self.indented_startcol,
-                            '-> ' + str(i) + '. ' + datalist[i]['song_name'],
+                            '-> ' + str(i) + '. ' + datalist[i]['songname'],
                             curses.color_pair(2))
                     else:
                         self.screen.addstr(
                             i - offset + 8, self.startcol,
-                            str(i) + '. ' + datalist[i]['song_name'])
+                            str(i) + '. ' + datalist[i]['songname'])
 
             elif datatype == 'search':
                 self.screen.move(6, 1)

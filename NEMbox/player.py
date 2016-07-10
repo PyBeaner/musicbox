@@ -153,7 +153,7 @@ class Player(object):
                                       args=(onExit, popenArgs['mp3_url']))
             cache_thread = threading.Thread(
                 target=cacheSong,
-                args=(popenArgs['song_id'], popenArgs['song_name'], popenArgs[
+                args=(popenArgs['song_id'], popenArgs['songname'], popenArgs[
                     'artist'], popenArgs['mp3_url']))
             cache_thread.start()
         thread.start()
@@ -180,11 +180,11 @@ class Player(object):
         self.playing_flag = True
         self.pause_flag = False
         item = self.songs[self.info['player_list'][self.info['idx']]]
-        self.ui.build_playinfo(item['song_name'], item['artist'],
+        self.ui.build_playinfo(item['songname'], item['artist'],
                                item['album_name'], item['quality'],
                                time.time())
         if self.notifier:
-            self.ui.notify('Now playing', item['song_name'],
+            self.ui.notify('Now playing', item['songname'],
                            item['album_name'], item['artist'])
         self.playing_id = item['song_id']
         self.popen_recall(self.recall, item)
@@ -209,7 +209,7 @@ class Player(object):
                 self.songs[str(song['song_id'])] = song
             else:
                 database_song = self.songs[str(song['song_id'])]
-                if (database_song['song_name'] != song['song_name'] or
+                if (database_song['songname'] != song['songname'] or
                         database_song['quality'] != song['quality']):
                     self.songs[str(song['song_id'])] = song
 
@@ -221,7 +221,7 @@ class Player(object):
             else:
                 database_song = self.songs[str(song['song_id'])]
                 cond = any([database_song[k] != song[k]
-                            for k in ('song_name', 'quality', 'mp3_url')])
+                            for k in ('songname', 'quality', 'mp3_url')])
                 if cond:
                     if 'cache' in self.songs[str(song['song_id'])].keys():
                         song['cache'] = self.songs[str(song['song_id'])][
@@ -273,7 +273,7 @@ class Player(object):
         self.popen_handler.stdin.write('P\n')
 
         item = self.songs[self.info['player_list'][self.info['idx']]]
-        self.ui.build_playinfo(item['song_name'],
+        self.ui.build_playinfo(item['songname'],
                                item['artist'],
                                item['album_name'],
                                item['quality'],
@@ -285,7 +285,7 @@ class Player(object):
         self.popen_handler.stdin.write('P\n')
 
         item = self.songs[self.info['player_list'][self.info['idx']]]
-        self.ui.build_playinfo(item['song_name'], item['artist'],
+        self.ui.build_playinfo(item['songname'], item['artist'],
                                item['album_name'], item['quality'],
                                time.time())
         self.playing_id = item['song_id']
@@ -427,11 +427,11 @@ class Player(object):
             self.ui.update_size()
             item = self.songs[self.info['player_list'][self.info['idx']]]
             if self.playing_flag:
-                self.ui.build_playinfo(item['song_name'], item['artist'],
+                self.ui.build_playinfo(item['songname'], item['artist'],
                                        item['album_name'], item['quality'],
                                        time.time())
             if self.pause_flag:
-                self.ui.build_playinfo(item['song_name'],
+                self.ui.build_playinfo(item['songname'],
                                        item['artist'],
                                        item['album_name'],
                                        item['quality'],

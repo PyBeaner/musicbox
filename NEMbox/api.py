@@ -584,7 +584,7 @@ class NetEase(object):
             url, quality = get_stream_url(data)
             channel_info = {
                 'song_id': data['id'],
-                'song_name': data['name'],
+                'songname': data['name'],
                 'artist': data['artists'][0]['name'],
                 'album_name': '主播电台',
                 'mp3_url': url,
