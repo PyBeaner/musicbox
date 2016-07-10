@@ -90,7 +90,7 @@ class Player(object):
                     continue
                 elif strout[:2] == '@E':
                     # get a alternative url from new api
-                    sid = popenArgs['song_id']
+                    sid = popenArgs['songmid']
                     new_url = NetEase().songs_detail_new_api([sid])[0]['url']
                     if new_url is None:
                         log.warning(('Song {} is unavailable '
@@ -153,7 +153,7 @@ class Player(object):
                                       args=(onExit, popenArgs['mp3_url']))
             cache_thread = threading.Thread(
                 target=cacheSong,
-                args=(popenArgs['song_id'], popenArgs['songname'], popenArgs[
+                args=(popenArgs['songmid'], popenArgs['songname'], popenArgs[
                     'artist'], popenArgs['mp3_url']))
             cache_thread.start()
         thread.start()
@@ -180,13 +180,13 @@ class Player(object):
         self.playing_flag = True
         self.pause_flag = False
         item = self.songs[self.info['player_list'][self.info['idx']]]
-        self.ui.build_playinfo(item['songname'], item['artist'],
-                               item['album_name'], item['quality'],
+        self.ui.build_playinfo(item['songname'], item['singername'],
+                               item['albumname'], item['quality'],
                                time.time())
         if self.notifier:
             self.ui.notify('Now playing', item['songname'],
-                           item['album_name'], item['artist'])
-        self.playing_id = item['song_id']
+                           item['albumname'], item['singername'])
+        self.playing_id = item['songmid']
         self.popen_recall(self.recall, item)
 
     def generate_shuffle_playing_list(self):
@@ -204,29 +204,29 @@ class Player(object):
         del self.info['playing_list'][:]
         self.info['ridx'] = 0
         for song in datalist:
-            self.info['player_list'].append(str(song['song_id']))
-            if str(song['song_id']) not in self.songs.keys():
-                self.songs[str(song['song_id'])] = song
+            self.info['player_list'].append(str(song['songmid']))
+            if str(song['songmid']) not in self.songs.keys():
+                self.songs[str(song['songmid'])] = song
             else:
-                database_song = self.songs[str(song['song_id'])]
+                database_song = self.songs[str(song['songmid'])]
                 if (database_song['songname'] != song['songname'] or
                         database_song['quality'] != song['quality']):
-                    self.songs[str(song['song_id'])] = song
+                    self.songs[str(song['songmid'])] = song
 
     def append_songs(self, datalist):
         for song in datalist:
-            self.info['player_list'].append(str(song['song_id']))
-            if str(song['song_id']) not in self.songs.keys():
-                self.songs[str(song['song_id'])] = song
+            self.info['player_list'].append(str(song['songmid']))
+            if str(song['songmid']) not in self.songs.keys():
+                self.songs[str(song['songmid'])] = song
             else:
-                database_song = self.songs[str(song['song_id'])]
+                database_song = self.songs[str(song['songmid'])]
                 cond = any([database_song[k] != song[k]
                             for k in ('songname', 'quality', 'mp3_url')])
                 if cond:
-                    if 'cache' in self.songs[str(song['song_id'])].keys():
-                        song['cache'] = self.songs[str(song['song_id'])][
+                    if 'cache' in self.songs[str(song['songmid'])].keys():
+                        song['cache'] = self.songs[str(song['songmid'])][
                             'cache']
-                    self.songs[str(song['song_id'])] = song
+                    self.songs[str(song['songmid'])] = song
         if len(datalist) > 0 and self.info['playing_mode'] == 3 or self.info[
                 'playing_mode'] == 4:
             self.generate_shuffle_playing_list()
@@ -274,8 +274,8 @@ class Player(object):
 
         item = self.songs[self.info['player_list'][self.info['idx']]]
         self.ui.build_playinfo(item['songname'],
-                               item['artist'],
-                               item['album_name'],
+                               item['singername'],
+                               item['albumname'],
                                item['quality'],
                                time.time(),
                                pause=True)
@@ -285,10 +285,10 @@ class Player(object):
         self.popen_handler.stdin.write('P\n')
 
         item = self.songs[self.info['player_list'][self.info['idx']]]
-        self.ui.build_playinfo(item['songname'], item['artist'],
-                               item['album_name'], item['quality'],
+        self.ui.build_playinfo(item['songname'], item['singername'],
+                               item['albumname'], item['quality'],
                                time.time())
-        self.playing_id = item['song_id']
+        self.playing_id = item['songmid']
 
     def _swap_song(self):
         plist = self.info['playing_list']
@@ -427,13 +427,13 @@ class Player(object):
             self.ui.update_size()
             item = self.songs[self.info['player_list'][self.info['idx']]]
             if self.playing_flag:
-                self.ui.build_playinfo(item['songname'], item['artist'],
-                                       item['album_name'], item['quality'],
+                self.ui.build_playinfo(item['songname'], item['singername'],
+                                       item['albumname'], item['quality'],
                                        time.time())
             if self.pause_flag:
                 self.ui.build_playinfo(item['songname'],
-                                       item['artist'],
-                                       item['album_name'],
+                                       item['singername'],
+                                       item['albumname'],
                                        item['quality'],
                                        time.time(),
                                        pause=True)

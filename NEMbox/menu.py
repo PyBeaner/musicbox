@@ -416,7 +416,7 @@ class Menu(object):
             elif key == ord(' '):
                 # If not open a new playing list, just play and pause.
                 try:
-                    if self.datalist[idx]['song_id'] == self.player.playing_id:
+                    if self.datalist[idx]['songmid'] == self.player.playing_id:
                         self.player.play_and_pause(self.storage.database[
                             'player_info']['idx'])
                         time.sleep(0.1)
@@ -545,7 +545,7 @@ class Menu(object):
                 s = self.datalist[idx]
                 cache_thread = threading.Thread(
                     target=self.player.cacheSong1time,
-                    args=(s['song_id'], s['songname'], s['artist'], s[
+                    args=(s['songmid'], s['songname'], s['singername'], s[
                         'mp3_url']))
                 cache_thread.start()
 

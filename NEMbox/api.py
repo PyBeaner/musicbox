@@ -467,6 +467,7 @@ class NetEase(object):
             return {}
         song_data = song_data[0]
         song_data = json.loads(song_data)
+        song_data['singername'] = song_data['singer'][0]['name']# TODO:multiple singers?
         return song_data
 
     # lyric http://music.163.com/api/song/lyric?os=osx&id= &lv=-1&kv=-1&tv=-1
@@ -567,7 +568,7 @@ class NetEase(object):
                 albums_info = {
                     'album_id': data[i]['id'],
                     'albums_name': data[i]['name'],
-                    'artists_name': data[i]['artist']['name']
+                    'artists_name': data[i]['singername']['name']
                 }
                 temp.append(albums_info)
 
@@ -583,10 +584,10 @@ class NetEase(object):
         elif dig_type == 'channels':
             url, quality = get_stream_url(data)
             channel_info = {
-                'song_id': data['id'],
+                'songmid': data['id'],
                 'songname': data['name'],
                 'artist': data['artists'][0]['name'],
-                'album_name': '主播电台',
+                'albumname': '主播电台',
                 'mp3_url': url,
                 'quality': quality
             }
@@ -613,7 +614,7 @@ if __name__ == '__main__':
     # print geturl_new_api(ne.songs_detail([27902910])[0])  # MD 128k, fallback
     # print ne.songs_detail_new_api('00309Hdu17kB1T')['url']
     # print ne.top_songlist(0)
-    print ne.song_info('00309Hdu17kB1T')['singer'][0]['name']
+    print ne.song_info('00309Hdu17kB1T')['singername']
     # print ne.dig_info(ne.top_songlist(0),'songs')
     # print ne.songs_detail([405079776])[0]['mp3Url']  # old api
     # print requests.get(ne.songs_detail([405079776])[0][
