@@ -403,7 +403,7 @@ class NetEase(object):
             # 去重
             songids = uniq(songids)
             print(songids)
-            return self.songs_detail(songids)
+            return [self.song_info(song_id) for song_id in songids]
         except requests.exceptions.RequestException as e:
             log.error(e)
             return []
@@ -544,32 +544,9 @@ class NetEase(object):
         temp = []
         if dig_type == 'songs' or dig_type == 'fmsongs':
             for i in range(0, len(data)):
-                url = self.song_info(data[i])['url']
-                quality = ''  # TODO:quality
-                url, quality = get_stream_url(data[i])
-                if data[i]['album'] is not None:
-                    album_name = data[i]['album']['name']
-                else:
-                    album_name = '未知专辑'  # TODO:album name
-
-                song_info = {
-                    'song_id': data[i]['id'],
-                    'artist': [],
-                    'song_name': data[i]['name'],
-                    'album_name': album_name,
-                    'mp3_url': url,
-                    'quality': quality
-                }
-                if 'artist' in data[i]:
-                    song_info['artist'] = data[i]['artist']
-                elif 'artists' in data[i]:
-                    for j in range(0, len(data[i]['artists'])):
-                        song_info['artist'].append(data[i]['artists'][j][
-                                                       'name'])
-                    song_info['artist'] = ', '.join(song_info['artist'])
-                else:
-                    song_info['artist'] = '未知艺术家'
-
+                song_info = data[i]
+                song_info['mp3_url'] = self.get_stream_url(song_info['songmid'])
+                song_info['quality'] = ''# TODO:quality
                 temp.append(song_info)
 
         elif dig_type == 'artists':
