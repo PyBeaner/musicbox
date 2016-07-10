@@ -446,6 +446,8 @@ class NetEase(object):
 
     # song ids --> song urls ( details )
     def songs_detail(self, ids, offset=0):
+        return ["http://y.qq.com/#type=song&mid={song_id}&tpl=yqq_song_detail&play=0".format(song_id=song_id) for song_id in ids]
+
         tmpids = ids[offset:]
         tmpids = tmpids[0:100]
         tmpids = map(str, tmpids)
@@ -664,7 +666,7 @@ if __name__ == '__main__':
     ne = NetEase()
     # print geturl_new_api(ne.songs_detail([27902910])[0])  # MD 128k, fallback
     # print ne.songs_detail_new_api('00309Hdu17kB1T')['url']
-    print ne.top_songlist(0)
+    # print ne.top_songlist(0)
     # print ne.songs_detail([405079776])[0]['mp3Url']  # old api
     # print requests.get(ne.songs_detail([405079776])[0][
     #     'mp3Url']).status_code  # 404
