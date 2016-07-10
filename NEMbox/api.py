@@ -547,7 +547,6 @@ class NetEase(object):
         if dig_type == 'songs' or dig_type == 'fmsongs':
             for i in range(0, len(data)):
                 song_info = data[i]
-                song_info['mp3_url'] = self.get_stream_url(song_info['songmid'])
                 song_info['quality'] = ''# TODO:quality
                 temp.append(song_info)
 
@@ -615,7 +614,7 @@ if __name__ == '__main__':
     # print ne.songs_detail_new_api('00309Hdu17kB1T')['url']
     # print ne.top_songlist(0)
     # print ne.song_info('00309Hdu17kB1T')
-    print ne.dig_info([ne.song_info('00309Hdu17kB1T')],'songs')
+    print ne.dig_info(ne.top_songlist(0),'songs')
     # print ne.songs_detail([405079776])[0]['mp3Url']  # old api
     # print requests.get(ne.songs_detail([405079776])[0][
     #     'mp3Url']).status_code  # 404
