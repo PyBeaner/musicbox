@@ -26,28 +26,10 @@ import logger
 
 # 歌曲榜单地址
 top_list_all = {
-    0: ['云音乐新歌榜', '/discover/toplist?id=3779629'],
-    1: ['云音乐热歌榜', '/discover/toplist?id=3778678'],
-    2: ['网易原创歌曲榜', '/discover/toplist?id=2884035'],
-    3: ['云音乐飙升榜', '/discover/toplist?id=19723756'],
-    4: ['云音乐电音榜', '/discover/toplist?id=10520166'],
-    5: ['UK排行榜周榜', '/discover/toplist?id=180106'],
-    6: ['美国Billboard周榜', '/discover/toplist?id=60198'],
-    7: ['KTV嗨榜', '/discover/toplist?id=21845217'],
-    8: ['iTunes榜', '/discover/toplist?id=11641012'],
-    9: ['Hit FM Top榜', '/discover/toplist?id=120001'],
-    10: ['日本Oricon周榜', '/discover/toplist?id=60131'],
-    11: ['韩国Melon排行榜周榜', '/discover/toplist?id=3733003'],
-    12: ['韩国Mnet排行榜周榜', '/discover/toplist?id=60255'],
-    13: ['韩国Melon原声周榜', '/discover/toplist?id=46772709'],
-    14: ['中国TOP排行榜(港台榜)', '/discover/toplist?id=112504'],
-    15: ['中国TOP排行榜(内地榜)', '/discover/toplist?id=64016'],
-    16: ['香港电台中文歌曲龙虎榜', '/discover/toplist?id=10169002'],
-    17: ['华语金曲榜', '/discover/toplist?id=4395559'],
-    18: ['中国嘻哈榜', '/discover/toplist?id=1899724'],
-    19: ['法国 NRJ EuroHot 30周榜', '/discover/toplist?id=27135204'],
-    20: ['台湾Hito排行榜', '/discover/toplist?id=112463'],
-    21: ['Beatport全球电子舞曲榜', '/discover/toplist?id=3812895']
+    0: ['内地', '/discover/toplist?id=3779629'],
+    1: ['新歌', '/discover/toplist?id=3778678'],
+    2: ['港台', '/discover/toplist?id=2884035'],
+    3: ['欧美', '/discover/toplist?id=19723756'],
 }
 
 default_timeout = 10
@@ -422,13 +404,14 @@ class NetEase(object):
 
     # 热门单曲 http://music.163.com/discover/toplist?id=
     def top_songlist(self, idx=0, offset=0, limit=100):
-        action = 'http://music.163.com' + top_list_all[idx][1]
+        # action = 'http://music.163.com' + top_list_all[idx][1]
+        action = "http://y.qq.com/#type=toplist&p=top_"+top_list_all[idx][1]
         try:
             connection = requests.get(action,
                                       headers=self.header,
                                       timeout=default_timeout)
             connection.encoding = 'UTF-8'
-            songids = re.findall(r'/song\?id=(\d+)', connection.text)
+            songids = re.findall(r'songmid=(\w+)', connection.text)
             if songids == []:
                 return []
             # 去重
@@ -477,22 +460,23 @@ class NetEase(object):
             log.error(e)
             return []
 
-    def songs_detail_new_api(self, music_ids, bit_rate=320000):
-        action = 'http://music.163.com/weapi/song/enhance/player/url?csrf_token='  # NOQA
-        self.session.cookies.load()
-        csrf = ''
-        for cookie in self.session.cookies:
-            if cookie.name == '__csrf':
-                csrf = cookie.value
-        if csrf == '':
-            notify('You Need Login', 1)
-        action += csrf
-        data = {'ids': music_ids, 'br': bit_rate, 'csrf_token': csrf}
-        connection = self.session.post(action,
-                                       data=encrypted_request(data),
-                                       headers=self.header, )
-        result = json.loads(connection.content)
-        return result['data']
+    def songs_detail_new_api(self, song_id, bit_rate=320000):
+        # TODO:guid/g_tk?
+        config_url = "http://base.music.qq.com/fcgi-bin/fcg_musicexpress.fcg?json=3&guid=5746725496&g_tk=178887276" \
+                     "&hostUin=0&format=jsonp&inCharset=GB2312&outCharset=GB2312&notice=0&platform=yqq" \
+                     "&jsonpCallback=jsonCallback&needNewCode=0"
+        resp = self.session.get(config_url)
+        json_body = resp.content.split('(')[1].strip(');')
+        config = json.loads(json_body)
+        if not config or config['code']!=0:
+            notify('无法获取歌曲播放地址')
+        vkey = config['key']
+        # TODO:C200?
+        song_url = "http://ws.stream.qqmusic.qq.com/{song_id}.m4a?vkey={vkey}&guid=5746725496&fromtag=30".format(song_id="C200"+song_id,vkey=vkey)
+        print(song_url)
+        return {
+            'url':song_url
+        }
 
     # song id --> song url ( details )
     def song_detail(self, music_id):
@@ -669,8 +653,8 @@ class NetEase(object):
 
 if __name__ == '__main__':
     ne = NetEase()
-    print geturl_new_api(ne.songs_detail([27902910])[0])  # MD 128k, fallback
-    print ne.songs_detail_new_api([27902910])[0]['url']
-    print ne.songs_detail([405079776])[0]['mp3Url']  # old api
-    print requests.get(ne.songs_detail([405079776])[0][
-        'mp3Url']).status_code  # 404
+    # print geturl_new_api(ne.songs_detail([27902910])[0])  # MD 128k, fallback
+    print ne.songs_detail_new_api('00309Hdu17kB1T')['url']
+    # print ne.songs_detail([405079776])[0]['mp3Url']  # old api
+    # print requests.get(ne.songs_detail([405079776])[0][
+    #     'mp3Url']).status_code  # 404

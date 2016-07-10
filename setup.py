@@ -54,7 +54,7 @@ setup(
 
     author='omi',
     author_email='4399.omi@gmail.com',
-    url='https://github.com/darknessomi/musicbox',
+    url='https://github.com/PyBeaner/musicbox',
     description='A sexy command line interface musicbox',
-    keywords=['music', 'netease', 'cli', 'player'],
+    keywords=['music', 'qq', 'cli', 'player'],
 )
