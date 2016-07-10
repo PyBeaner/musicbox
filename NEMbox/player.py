@@ -22,6 +22,7 @@ from api import NetEase
 from cache import Cache
 from config import Config
 import logger
+from api import get_stream_url
 
 log = logger.getLogger(__name__)
 
@@ -91,7 +92,7 @@ class Player(object):
                 elif strout[:2] == '@E':
                     # get a alternative url from new api
                     sid = popenArgs['songmid']
-                    new_url = NetEase().songs_detail_new_api([sid])[0]['url']
+                    new_url = NetEase().get_stream_url(sid)
                     if new_url is None:
                         log.warning(('Song {} is unavailable '
                                      'due to copyright issue').format(sid))
@@ -154,7 +155,7 @@ class Player(object):
             cache_thread = threading.Thread(
                 target=cacheSong,
                 args=(popenArgs['songmid'], popenArgs['songname'], popenArgs[
-                    'artist'], popenArgs['mp3_url']))
+                    'singername'], popenArgs['mp3_url']))
             cache_thread.start()
         thread.start()
         lyric_download_thread = threading.Thread(target=getLyric, args=())
@@ -187,6 +188,8 @@ class Player(object):
             self.ui.notify('Now playing', item['songname'],
                            item['albumname'], item['singername'])
         self.playing_id = item['songmid']
+        if 'mp3_url' not in item:# 获取音频流地址比较慢，所以没有预先全部获取
+            item['mp3_url'] = get_stream_url(item['songmid'])
         self.popen_recall(self.recall, item)
 
     def generate_shuffle_playing_list(self):

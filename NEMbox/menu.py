@@ -545,8 +545,7 @@ class Menu(object):
                 s = self.datalist[idx]
                 cache_thread = threading.Thread(
                     target=self.player.cacheSong1time,
-                    args=(s['songmid'], s['songname'], s['singername'], s[
-                        'mp3_url']))
+                    args=(s['songmid'], s['songname'], s['singername'], s['mp3_url']))
                 cache_thread.start()
 
             elif key == ord('i'):

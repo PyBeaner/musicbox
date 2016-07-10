@@ -77,7 +77,7 @@ class Cache(Singleton):
             output_file = str(artist) + ' - ' + str(song_name) + '.mp3'
             full_path = os.path.join(output_path, output_file)
 
-            new_url = NetEase().songs_detail_new_api([song_id])[0]['url']
+            new_url = NetEase().get_stream_url(song_id)
             log.info('Old:{}. New:{}'.format(url, new_url))
             try:
                 para = ['aria2c', '--auto-file-renaming=false',

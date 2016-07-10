@@ -100,10 +100,9 @@ def uniq(arr):
 # 获取高音质mp3 url
 def get_stream_url(song_id):
     br_to_quality = {128000: 'MD 128k', 320000: 'HD 320k'}
-    alter = NetEase().songs_detail_new_api(song_id)[0]
-    url = alter['url']
-    quality = br_to_quality.get(alter['br'], '')
-    return url, quality
+    url = NetEase().get_stream_url(song_id)
+    quality = ''# TODO:quantity
+    return url
 
 
 class NetEase(object):
@@ -118,7 +117,7 @@ class NetEase(object):
             'Referer': 'http://y.qq.com',
             'User-Agent':
                 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/33.0.1750.152 Safari/537.36'
-        # NOQA
+            # NOQA
         }
         self.cookies = {'appver': '1.5.2'}
         self.playlist_class_dict = {}
@@ -403,7 +402,7 @@ class NetEase(object):
             # 去重
             songids = uniq(songids)
             songs = [self.song_info(song_id) for song_id in songids]
-            songs = [song for song in songs if song]#有时候会返回空？
+            songs = [song for song in songs if song]  # 有时候会返回空？
             return songs
         except requests.exceptions.RequestException as e:
             log.error(e)
@@ -429,19 +428,12 @@ class NetEase(object):
             log.error(e)
             return []
 
-    def songs_detail_new_api(self, song_id, bit_rate=320000):
-        # TODO:guid/g_tk?
+    def get_stream_url(self, song_id):
         """
-        获取歌曲信息：url
-        :param song_id: 如00309Hdu17kB1T
-        :param bit_rate:
+        获取歌曲音频流地址
+        :param song_id:
         :return:
         """
-        return {
-            'url': self.get_stream_url(song_id)
-        }
-
-    def get_stream_url(self, song_id):
         config_url = "http://base.music.qq.com/fcgi-bin/fcg_musicexpress.fcg?json=3&guid=5746725496&g_tk=178887276" \
                      "&hostUin=0&format=jsonp&inCharset=GB2312&outCharset=GB2312&notice=0&platform=yqq" \
                      "&jsonpCallback=jsonCallback&needNewCode=0"
@@ -462,12 +454,12 @@ class NetEase(object):
         resp = self.session.request('GET', url)
         song_data = re.findall(r"g_SongData\s?=\s?(\{.+\})", resp.content)
         if not song_data:
-            print("Cannot retrieve song info")# TODO:empty info
-            print("Resp is "+resp.content)
+            print("Cannot retrieve song info")  # TODO:empty info
+            print("Resp is " + resp.content)
             return {}
         song_data = song_data[0]
         song_data = json.loads(song_data)
-        song_data['singername'] = song_data['singer'][0]['name']# TODO:multiple singers?
+        song_data['singername'] = song_data['singer'][0]['name']  # TODO:multiple singers?
         return song_data
 
     # lyric http://music.163.com/api/song/lyric?os=osx&id= &lv=-1&kv=-1&tv=-1
@@ -548,7 +540,7 @@ class NetEase(object):
         if dig_type == 'songs' or dig_type == 'fmsongs':
             for i in range(0, len(data)):
                 song_info = data[i]
-                song_info['quality'] = ''# TODO:quality
+                song_info['quality'] = ''  # TODO:quality
                 temp.append(song_info)
 
         elif dig_type == 'artists':
@@ -582,7 +574,8 @@ class NetEase(object):
                 temp.append(playlists_info)
 
         elif dig_type == 'channels':
-            url, quality = get_stream_url(data)
+            url = get_stream_url(data)
+            quality = ''
             channel_info = {
                 'songmid': data['id'],
                 'songname': data['name'],
@@ -612,9 +605,10 @@ class NetEase(object):
 if __name__ == '__main__':
     ne = NetEase()
     # print geturl_new_api(ne.songs_detail([27902910])[0])  # MD 128k, fallback
-    # print ne.songs_detail_new_api('00309Hdu17kB1T')['url']
+    # print ne.get_stream_url('00309Hdu17kB1T')
     # print ne.top_songlist(0)
-    print ne.song_info('00309Hdu17kB1T')['singername']
+    print
+    ne.song_info('00309Hdu17kB1T')['singername']
     # print ne.dig_info(ne.top_songlist(0),'songs')
     # print ne.songs_detail([405079776])[0]['mp3Url']  # old api
     # print requests.get(ne.songs_detail([405079776])[0][
