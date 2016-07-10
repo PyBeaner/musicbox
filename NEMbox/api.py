@@ -462,16 +462,26 @@ class NetEase(object):
         song_data['singername'] = song_data['singer'][0]['name']  # TODO:multiple singers?
         return song_data
 
-    # lyric http://music.163.com/api/song/lyric?os=osx&id= &lv=-1&kv=-1&tv=-1
-    def song_lyric(self, music_id):
-        action = 'http://music.163.com/api/song/lyric?os=osx&id={}&lv=-1&kv=-1&tv=-1'.format(  # NOQA
-                                                                                               music_id)
+    def song_lyric(self, song_id):
+        """
+        获取歌词信息
+        :param song_id:
+        :return:
+        """
+        action = "http://i.y.qq.com/lyric/fcgi-bin/fcg_query_lyric.fcg?pcachetime={time}&songmid={song_id}&g_tk=938407465" \
+                 "&hostUin=0&format=jsonp&inCharset=GB2312&outCharset=utf-8" \
+                 "&notice=0&platform=yqq&jsonpCallback=MusicJsonCallback&needNewCode=0".format(song_id=song_id,time=str(int(time.time()))+"000")
         try:
-            data = self.httpRequest('GET', action)
-            if 'lrc' in data and data['lrc']['lyric'] is not None:
-                lyric_info = data['lrc']['lyric']
-            else:
+            headers = self.header
+            headers['Host'] = 'i.y.qq.com'
+            resp = self.session.request('GET', action,headers=headers)
+            json_body = resp.content.split('(')[1].strip(")")
+            result = json.loads(json_body)
+            print(result)
+            if not result or result['retcode']!=0:
                 lyric_info = '未找到歌词'
+            else:
+                lyric_info = base64.b64decode(result['lyric'])
             return lyric_info
         except requests.exceptions.RequestException as e:
             log.error(e)
@@ -607,8 +617,8 @@ if __name__ == '__main__':
     # print geturl_new_api(ne.songs_detail([27902910])[0])  # MD 128k, fallback
     # print ne.get_stream_url('00309Hdu17kB1T')
     # print ne.top_songlist(0)
-    print
-    ne.song_info('00309Hdu17kB1T')['singername']
+    # print ne.song_info('00309Hdu17kB1T')['singername']
+    print ne.song_lyric('00309Hdu17kB1T')
     # print ne.dig_info(ne.top_songlist(0),'songs')
     # print ne.songs_detail([405079776])[0]['mp3Url']  # old api
     # print requests.get(ne.songs_detail([405079776])[0][
