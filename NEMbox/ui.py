@@ -161,8 +161,7 @@ class Ui(object):
         if 'lyric' not in song.keys() or len(song['lyric']) <= 0:
             self.now_lyric = '暂无歌词 ~>_<~ \n'
             if dbus_activity and self.config.get_item('osdlyrics'):
-                self.now_playing = song['songname'] + ' - ' + song[
-                    'artist'] + '\n'
+                self.now_playing = song['songname'] + ' - ' + song['singer'][0]['name'] + '\n'
 
         else:
             key = now_minute + ':' + now_second
@@ -235,7 +234,7 @@ class Ui(object):
                                            curses.color_pair(2))
                         name = '{}{}{}  < {} >'.format(
                             datalist[i]['songname'], self.space,
-                            datalist[i]['artist'], datalist[i]['albumname'])
+                            datalist[i]['singer'][0]['name'], datalist[i]['albumname'])
 
                         # the length decides whether to scoll
                         if truelen(name) < self.x - self.startcol - 1:
@@ -256,8 +255,8 @@ class Ui(object):
                             i - offset + 8, self.startcol,
                             '{}. {}{}{}  < {} >'.format(
                                 i, datalist[i]['songname'], self.space,
-                                datalist[i]['artist'],
-                                datalist[i]['album_name'])[:int(self.x * 2)])
+                                datalist[i]['singer'][0]['name'],# TODO:get singer name
+                                datalist[i]['albumname'])[:int(self.x * 2)])
 
                 self.screen.addstr(iter_range - offset + 8, 0, ' ' * self.x)
 

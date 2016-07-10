@@ -613,8 +613,8 @@ if __name__ == '__main__':
     # print geturl_new_api(ne.songs_detail([27902910])[0])  # MD 128k, fallback
     # print ne.songs_detail_new_api('00309Hdu17kB1T')['url']
     # print ne.top_songlist(0)
-    # print ne.song_info('00309Hdu17kB1T')
-    print ne.dig_info(ne.top_songlist(0),'songs')
+    print ne.song_info('00309Hdu17kB1T')['singer'][0]['name']
+    # print ne.dig_info(ne.top_songlist(0),'songs')
     # print ne.songs_detail([405079776])[0]['mp3Url']  # old api
     # print requests.get(ne.songs_detail([405079776])[0][
     #     'mp3Url']).status_code  # 404
