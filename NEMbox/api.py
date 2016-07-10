@@ -402,8 +402,9 @@ class NetEase(object):
                 return []
             # 去重
             songids = uniq(songids)
-            print(songids)
-            return [self.song_info(song_id) for song_id in songids]
+            songs = [self.song_info(song_id) for song_id in songids]
+            songs = [song for song in songs if song]#有时候会返回空？
+            return songs
         except requests.exceptions.RequestException as e:
             log.error(e)
             return []
@@ -461,7 +462,8 @@ class NetEase(object):
         resp = self.session.request('GET', url)
         song_data = re.findall(r"g_SongData\s?=\s?(\{.+\})", resp.content)
         if not song_data:
-            print("Cannot retrieve song info")
+            print("Cannot retrieve song info")# TODO:empty info
+            print("Resp is "+resp.content)
             return {}
         song_data = song_data[0]
         song_data = json.loads(song_data)
@@ -612,8 +614,8 @@ if __name__ == '__main__':
     # print geturl_new_api(ne.songs_detail([27902910])[0])  # MD 128k, fallback
     # print ne.songs_detail_new_api('00309Hdu17kB1T')['url']
     # print ne.top_songlist(0)
-    print ne.song_info('00309Hdu17kB1T')
-    # print ne.dig_info(['00309Hdu17kB1T'],'songs')
+    # print ne.song_info('00309Hdu17kB1T')
+    print ne.dig_info([ne.song_info('00309Hdu17kB1T')],'songs')
     # print ne.songs_detail([405079776])[0]['mp3Url']  # old api
     # print requests.get(ne.songs_detail([405079776])[0][
     #     'mp3Url']).status_code  # 404
