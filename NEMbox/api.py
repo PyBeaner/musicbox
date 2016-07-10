@@ -26,10 +26,11 @@ import logger
 
 # 歌曲榜单地址
 top_list_all = {
-    0: ['内地', '/discover/toplist?id=3779629'],
-    1: ['新歌', '/discover/toplist?id=3778678'],
-    2: ['港台', '/discover/toplist?id=2884035'],
-    3: ['欧美', '/discover/toplist?id=19723756'],
+    # 列表编号，榜单名，榜单ID
+    0: ['内地', 5],
+    1: ['新歌', 27],
+    2: ['港台', 6],
+    3: ['欧美', 3],
 }
 
 default_timeout = 10
@@ -135,8 +136,8 @@ class NetEase(object):
             'Accept-Language': 'zh-CN,zh;q=0.8,gl;q=0.6,zh-TW;q=0.4',
             'Connection': 'keep-alive',
             'Content-Type': 'application/x-www-form-urlencoded',
-            'Host': 'music.163.com',
-            'Referer': 'http://music.163.com/search/',
+            'Host': 'y.qq.com',
+            'Referer': 'http://y.qq.com',
             'User-Agent':
             'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/33.0.1750.152 Safari/537.36'  # NOQA
         }
@@ -405,7 +406,8 @@ class NetEase(object):
     # 热门单曲 http://music.163.com/discover/toplist?id=
     def top_songlist(self, idx=0, offset=0, limit=100):
         # action = 'http://music.163.com' + top_list_all[idx][1]
-        action = "http://y.qq.com/#type=toplist&p=top_"+top_list_all[idx][1]
+        action = "http://y.qq.com/#type=toplist&p=top_"+str(top_list_all[idx][1])
+        print(action)
         try:
             connection = requests.get(action,
                                       headers=self.header,
@@ -416,6 +418,7 @@ class NetEase(object):
                 return []
             # 去重
             songids = uniq(songids)
+            print(songids)
             return self.songs_detail(songids)
         except requests.exceptions.RequestException as e:
             log.error(e)
@@ -462,6 +465,12 @@ class NetEase(object):
 
     def songs_detail_new_api(self, song_id, bit_rate=320000):
         # TODO:guid/g_tk?
+        """
+        获取歌曲信息：url
+        :param song_id: 如00309Hdu17kB1T
+        :param bit_rate:
+        :return:
+        """
         config_url = "http://base.music.qq.com/fcgi-bin/fcg_musicexpress.fcg?json=3&guid=5746725496&g_tk=178887276" \
                      "&hostUin=0&format=jsonp&inCharset=GB2312&outCharset=GB2312&notice=0&platform=yqq" \
                      "&jsonpCallback=jsonCallback&needNewCode=0"
@@ -654,7 +663,8 @@ class NetEase(object):
 if __name__ == '__main__':
     ne = NetEase()
     # print geturl_new_api(ne.songs_detail([27902910])[0])  # MD 128k, fallback
-    print ne.songs_detail_new_api('00309Hdu17kB1T')['url']
+    # print ne.songs_detail_new_api('00309Hdu17kB1T')['url']
+    print ne.top_songlist(0)
     # print ne.songs_detail([405079776])[0]['mp3Url']  # old api
     # print requests.get(ne.songs_detail([405079776])[0][
     #     'mp3Url']).status_code  # 404
