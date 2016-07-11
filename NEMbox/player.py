@@ -57,8 +57,9 @@ class Player(object):
         '''
 
         def runInThread(onExit, arg):
-            para = ['mpg123', '-R']
-            para[1:1] = self.mpg123_parameters
+            # para = ['mpg123', '-R']
+            # para[1:1] = self.mpg123_parameters
+            para = ['mplayer',arg]
             self.popen_handler = subprocess.Popen(para,
                                                   stdin=subprocess.PIPE,
                                                   stdout=subprocess.PIPE,
@@ -262,7 +263,7 @@ class Player(object):
     def stop(self):
         if self.playing_flag and self.popen_handler:
             self.playing_flag = False
-            self.popen_handler.stdin.write('Q\n')
+            self.popen_handler.stdin.write('q\n')# Quit
             try:
                 self.popen_handler.kill()
             except OSError as e:
