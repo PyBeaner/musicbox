@@ -70,11 +70,11 @@ class Player(object):
                 onExit()
                 return
 
-            # TODO:mkfifo
             fifo = '/tmp/mplayer.fifo'
             if not os.path.exists(fifo):
                 os.mkfifo(fifo)
-            para = ['mplayer', '-slave', '-input', 'file='+fifo, stream_url]  # TODO:slave mode
+            # see:https://www.mplayerhq.hu/DOCS/tech/slave.txt
+            para = ['mplayer', '-slave', '-input', 'file=' + fifo, stream_url]  # TODO:slave mode
             self.popen_handler = subprocess.Popen(para,
                                                   stdin=subprocess.PIPE,
                                                   stdout=subprocess.PIPE,
@@ -92,9 +92,15 @@ class Player(object):
                 if self.playing_flag is False:
                     break
 
-                strout = self.popen_handler.stdout.readline()
+                self.popen_handler.stdin.write('get_percent_pos\n')
+                stdout = self.popen_handler.stdout.readline()
                 # TODO:current process location
-                if strout == '@P 0\n':
+                # 当前进度
+                if 'ANS_PERCENT_POSITION' in stdout:
+                    percentage = stdout.split('=')[1].strip()
+                    self.process_location = self.process_length * int(percentage) / 100
+
+                if stdout == '@P 0\n':
                     self.popen_handler.stdin.write('Q\n')
                     self.popen_handler.kill()
                     break
