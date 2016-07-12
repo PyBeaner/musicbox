@@ -14,7 +14,6 @@ import threading
 import time
 import os
 import random
-import re
 
 from ui import Ui
 from storage import Storage
@@ -65,20 +64,24 @@ class Player(object):
                 stream_url = popenArgs['mp3_url']
             else:
                 stream_url = ''
+
+            if not stream_url:
+                self.next_idx()
+                onExit()
+                return
+
             # TODO:mkfifo
-            para = ['mplayer', '-slave', '-input', 'file=/tmp/mplayer.fifo', stream_url]  # TODO:slave mode
+            fifo = '/tmp/mplayer.fifo'
+            if not os.path.exists(fifo):
+                os.mkfifo(fifo)
+            para = ['mplayer', '-slave', '-input', 'file='+fifo, stream_url]  # TODO:slave mode
             self.popen_handler = subprocess.Popen(para,
                                                   stdin=subprocess.PIPE,
                                                   stdout=subprocess.PIPE,
                                                   stderr=subprocess.PIPE)
             self.popen_handler.stdin.write('V ' + str(self.info[
                                                           'playing_volume']) + '\n')
-            if stream_url:
-                self.popen_handler.stdin.write(stream_url)
-            else:
-                self.next_idx()
-                onExit()
-                return
+            self.popen_handler.stdin.write(stream_url)
 
             # get seconds of the song
             size = popenArgs['size320']
@@ -272,7 +275,7 @@ class Player(object):
 
     def resume(self):
         self.pause_flag = False
-        self.popen_handler.stdin.write('pause\n')
+        self.popen_handler.stdin.write('pause\n')  # same as 'pause'
 
         item = self.songs[self.info['player_list'][self.info['idx']]]
         self.ui.build_playinfo(item['songname'], item['singername'],
@@ -312,7 +315,7 @@ class Player(object):
         playlist_len = len(self.info['player_list'])
         playinglist_len = len(self.info['playing_list'])
 
-        # Playing mode. 0 is ordered. 1 is orderde loop.
+        # Playing mode. 0 is ordered. 1 is ordered loop.
         # 2 is single song loop. 3 is single random. 4 is random loop
         if self.info['playing_mode'] == 0:
             self._inc_idx()
