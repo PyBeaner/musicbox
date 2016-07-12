@@ -249,7 +249,7 @@ class Player(object):
     def stop(self):
         if self.playing_flag and self.popen_handler:
             self.playing_flag = False
-            self.popen_handler.stdin.write('q\n')  # Quit
+            self.popen_handler.stdin.write('quit\n')  # Quit
             try:
                 self.popen_handler.kill()
             except OSError as e:
@@ -260,7 +260,7 @@ class Player(object):
         if not self.playing_flag and not self.popen_handler:
             return
         self.pause_flag = True
-        self.popen_handler.stdin.write('P\n')
+        self.popen_handler.stdin.write('pause\n')
 
         item = self.songs[self.info['player_list'][self.info['idx']]]
         self.ui.build_playinfo(item['songname'],
@@ -272,7 +272,7 @@ class Player(object):
 
     def resume(self):
         self.pause_flag = False
-        self.popen_handler.stdin.write('P\n')
+        self.popen_handler.stdin.write('pause\n')
 
         item = self.songs[self.info['player_list'][self.info['idx']]]
         self.ui.build_playinfo(item['songname'], item['singername'],
