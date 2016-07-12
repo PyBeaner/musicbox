@@ -89,23 +89,8 @@ class Player(object):
                     break
 
                 strout = self.popen_handler.stdout.readline()
-                # TODO:get current process location
-
-                if strout[:2] == '@E':
-                    # get a alternative url from new api
-                    sid = popenArgs['songmid']
-                    new_url = NetEase().get_stream_url(sid)
-                    if new_url is None:
-                        log.warning(('Song {} is unavailable '
-                                     'due to copyright issue').format(sid))
-                        break
-                    log.warning(
-                        'Song {} is not compatible with old api.'.format(sid))
-                    popenArgs['mp3_url'] = new_url
-
-                    self.popen_handler.stdin.write('\nL ' + new_url + '\n')
-                    self.popen_handler.stdout.readline()
-                elif strout == '@P 0\n':
+                # TODO:current process location
+                if strout == '@P 0\n':
                     self.popen_handler.stdin.write('Q\n')
                     self.popen_handler.kill()
                     break
