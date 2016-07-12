@@ -454,4 +454,8 @@ class Player(object):
             128: 16
         }
         kb_per_second = table[rate]
-        return size / kb_per_second / (10 ^ 6)
+        return size / kb_per_second / (10 ** 3)
+
+
+if __name__ == '__main__':
+    print(Player._size_to_seconds(11319601,320))

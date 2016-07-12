@@ -96,6 +96,15 @@ class Ui(object):
 
     def build_process_bar(self, now_playing, total_length, playing_flag,
                           pause_flag, playing_mode):
+        """
+        进度条
+        :param now_playing: 秒
+        :param total_length: 秒
+        :param playing_flag:
+        :param pause_flag:
+        :param playing_mode:
+        :return:
+        """
         if (self.storage.database['player_info']['idx'] >=
                 len(self.storage.database['player_info']['player_list'])):
             return
