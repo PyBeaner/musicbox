@@ -56,18 +56,24 @@ class Player(object):
         that would give to subprocess.Popen.
         '''
 
-        def runInThread(onExit, arg):
+        def runInThread(onExit, popenArgs):
             # para = ['mpg123', '-R']
             # para[1:1] = self.mpg123_parameters
-            para = ['mplayer',arg]
+            if 'cache' in popenArgs:
+                stream_url = popenArgs['cache']
+            elif 'mp3_url' in popenArgs:
+                stream_url = popenArgs['mp3_url']
+            else:
+                stream_url = ''
+            para = ['mplayer','-slave','-input file=mplayer.pipe'] # TODO:background(slave mode)
             self.popen_handler = subprocess.Popen(para,
                                                   stdin=subprocess.PIPE,
                                                   stdout=subprocess.PIPE,
                                                   stderr=subprocess.PIPE)
             self.popen_handler.stdin.write('V ' + str(self.info[
                 'playing_volume']) + '\n')
-            if arg:
-                self.popen_handler.stdin.write('L ' + arg + '\n')
+            if stream_url:
+                self.popen_handler.stdin.write(stream_url)
             else:
                 self.next_idx()
                 onExit()
@@ -147,17 +153,16 @@ class Player(object):
             self.cache.add(song_id, song_name, artist, song_url, cacheExit)
             self.cache.start_download()
 
-        if 'cache' in popenArgs.keys() and os.path.isfile(popenArgs['cache']):
-            thread = threading.Thread(target=runInThread,
-                                      args=(onExit, popenArgs['cache']))
-        else:
-            thread = threading.Thread(target=runInThread,
-                                      args=(onExit, popenArgs['mp3_url']))
+        # 是否缓存过？
+        if 'cache' not in popenArgs.keys() or not os.path.isfile(popenArgs['cache']):
             cache_thread = threading.Thread(
                 target=cacheSong,
                 args=(popenArgs['songmid'], popenArgs['songname'], popenArgs[
                     'singername'], popenArgs['mp3_url']))
             cache_thread.start()
+            
+        thread = threading.Thread(target=runInThread,
+                                  args=(onExit, popenArgs))
         thread.start()
         lyric_download_thread = threading.Thread(target=getLyric, args=())
         lyric_download_thread.start()
