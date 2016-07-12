@@ -73,8 +73,8 @@ class Player(object):
             fifo = '/tmp/mplayer.fifo'
             if not os.path.exists(fifo):
                 os.mkfifo(fifo)
-            # see:https://www.mplayerhq.hu/DOCS/tech/slave.txt
-            para = ['mplayer', '-slave', '-input', 'file=' + fifo, stream_url]  # TODO:slave mode
+            # see Slave Mode:https://www.mplayerhq.hu/DOCS/tech/slave.txt
+            para = ['mplayer', '-slave', '-input', 'file=' + fifo, stream_url]
             self.popen_handler = subprocess.Popen(para,
                                                   stdin=subprocess.PIPE,
                                                   stdout=subprocess.PIPE,
@@ -94,7 +94,7 @@ class Player(object):
 
                 self.popen_handler.stdin.write('get_percent_pos\n')
                 stdout = self.popen_handler.stdout.readline()
-                # TODO:current process location
+                # TODO:why it takes two seconds to update the position
                 # 当前进度
                 if 'ANS_PERCENT_POSITION' in stdout:
                     percentage = stdout.split('=')[1].strip()
