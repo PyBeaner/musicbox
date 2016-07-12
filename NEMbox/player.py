@@ -65,7 +65,8 @@ class Player(object):
                 stream_url = popenArgs['mp3_url']
             else:
                 stream_url = ''
-            para = ['mplayer', '-slave', '-input file=mplayer.pipe']  # TODO:background(slave mode)
+            # TODO:mkfifo
+            para = ['mplayer', '-slave', '-input', 'file=/tmp/mplayer.fifo', stream_url]  # TODO:slave mode
             self.popen_handler = subprocess.Popen(para,
                                                   stdin=subprocess.PIPE,
                                                   stdout=subprocess.PIPE,
@@ -81,7 +82,7 @@ class Player(object):
 
             # get seconds of the song
             size = popenArgs['size320']
-            self.process_length = self._size_to_seconds(size,320)
+            self.process_length = self._size_to_seconds(size, 320)
 
             self.process_first = True
             while True:
@@ -458,4 +459,4 @@ class Player(object):
 
 
 if __name__ == '__main__':
-    print(Player._size_to_seconds(11319601,320))
+    print(Player._size_to_seconds(11319601, 320))
