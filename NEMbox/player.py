@@ -65,13 +65,13 @@ class Player(object):
                 stream_url = popenArgs['mp3_url']
             else:
                 stream_url = ''
-            para = ['mplayer','-slave','-input file=mplayer.pipe'] # TODO:background(slave mode)
+            para = ['mplayer', '-slave', '-input file=mplayer.pipe']  # TODO:background(slave mode)
             self.popen_handler = subprocess.Popen(para,
                                                   stdin=subprocess.PIPE,
                                                   stdout=subprocess.PIPE,
                                                   stderr=subprocess.PIPE)
             self.popen_handler.stdin.write('V ' + str(self.info[
-                'playing_volume']) + '\n')
+                                                          'playing_volume']) + '\n')
             if stream_url:
                 self.popen_handler.stdin.write(stream_url)
             else:
@@ -79,24 +79,19 @@ class Player(object):
                 onExit()
                 return
 
+            # get seconds of the song
+            size = popenArgs['size320']
+            self.process_length = self._size_to_seconds(size,320)
+
             self.process_first = True
             while True:
                 if self.playing_flag is False:
                     break
 
                 strout = self.popen_handler.stdout.readline()
+                # TODO:get current process location
 
-                if re.match('^\@F.*$', strout):
-                    process_data = strout.split(' ')
-                    process_location = float(process_data[4])
-                    if self.process_first:
-                        self.process_length = process_location
-                        self.process_first = False
-                        self.process_location = 0
-                    else:
-                        self.process_location = self.process_length - process_location  # NOQA
-                    continue
-                elif strout[:2] == '@E':
+                if strout[:2] == '@E':
                     # get a alternative url from new api
                     sid = popenArgs['songmid']
                     new_url = NetEase().get_stream_url(sid)
@@ -160,7 +155,7 @@ class Player(object):
                 args=(popenArgs['songmid'], popenArgs['songname'], popenArgs[
                     'singername'], popenArgs['mp3_url']))
             cache_thread.start()
-            
+
         thread = threading.Thread(target=runInThread,
                                   args=(onExit, popenArgs))
         thread.start()
@@ -176,11 +171,11 @@ class Player(object):
 
     def recall(self):
         if self.info['idx'] >= len(self.info[
-                'player_list']) and self.end_callback is not None:
+                                       'player_list']) and self.end_callback is not None:
             log.debug('Callback')
             self.end_callback()
         if self.info['idx'] < 0 or self.info['idx'] >= len(self.info[
-                'player_list']):
+                                                               'player_list']):
             self.info['idx'] = 0
             self.stop()
             return
@@ -194,7 +189,7 @@ class Player(object):
             self.ui.notify('Now playing', item['songname'],
                            item['albumname'], item['singername'])
         self.playing_id = item['songmid']
-        if 'mp3_url' not in item:# 获取音频流地址比较慢，所以没有预先全部获取
+        if 'mp3_url' not in item:  # 获取音频流地址比较慢，所以没有预先全部获取
             item['mp3_url'] = get_stream_url(item['songmid'])
         self.popen_recall(self.recall, item)
 
@@ -219,7 +214,7 @@ class Player(object):
             else:
                 database_song = self.songs[str(song['songmid'])]
                 if (database_song['songname'] != song['songname'] or
-                        database_song['quality'] != song['quality']):
+                            database_song['quality'] != song['quality']):
                     self.songs[str(song['songmid'])] = song
 
     def append_songs(self, datalist):
@@ -237,7 +232,7 @@ class Player(object):
                             'cache']
                     self.songs[str(song['songmid'])] = song
         if len(datalist) > 0 and self.info['playing_mode'] == 3 or self.info[
-                'playing_mode'] == 4:
+            'playing_mode'] == 4:
             self.generate_shuffle_playing_list()
 
     def play_and_pause(self, idx):
@@ -268,7 +263,7 @@ class Player(object):
     def stop(self):
         if self.playing_flag and self.popen_handler:
             self.playing_flag = False
-            self.popen_handler.stdin.write('q\n')# Quit
+            self.popen_handler.stdin.write('q\n')  # Quit
             try:
                 self.popen_handler.kill()
             except OSError as e:
@@ -419,7 +414,7 @@ class Player(object):
         if not self.playing_flag:
             return
         self.popen_handler.stdin.write('V ' + str(self.info[
-            'playing_volume']) + '\n')
+                                                      'playing_volume']) + '\n')
 
     def volume_down(self):
         self.info['playing_volume'] = self.info['playing_volume'] - 7
@@ -429,7 +424,7 @@ class Player(object):
             return
 
         self.popen_handler.stdin.write('V ' + str(self.info[
-            'playing_volume']) + '\n')
+                                                      'playing_volume']) + '\n')
 
     def update_size(self):
         try:
@@ -458,3 +453,20 @@ class Player(object):
         self.cache.enable = True
         self.cache.add(song_id, song_name, artist, song_url, cacheExit)
         self.cache.start_download()
+
+    @staticmethod
+    def _size_to_seconds(size, rate):
+        """
+        http://www.audiomountain.com/tech/audio-file-size.html
+        :param size: bytes of the file
+        :param rate:
+        :return:
+        """
+        table = {
+            # rate=>KB per second
+            320: 40,
+            256: 32,
+            128: 16
+        }
+        kb_per_second = table[rate]
+        return size / kb_per_second / (10 ^ 6)
