@@ -101,7 +101,7 @@ def uniq(arr):
 def get_stream_url(song_id):
     br_to_quality = {128000: 'MD 128k', 320000: 'HD 320k'}
     url = NetEase().get_stream_url(song_id)
-    quality = ''# TODO:quantity
+    quality = ''  # TODO:quantity
     return url
 
 
@@ -389,20 +389,25 @@ class NetEase(object):
     # 热门单曲 http://music.163.com/discover/toplist?id=
     def top_songlist(self, idx=0, offset=0, limit=100):
         # action = 'http://music.163.com' + top_list_all[idx][1]
-        action = "http://y.qq.com/#type=toplist&p=top_" + str(top_list_all[idx][1])
+        top_id = top_list_all[idx][1]
+        action = "http://i.y.qq.com/v8/fcg-bin/fcg_v8_toplist_cp.fcg?tpl=20&page=detail&date=2016_27" \
+                 "&type=top&topid={top_id}&g_tk=1371149499&format=json" \
+                 "&inCharset=GB2312&outCharset=utf-8" \
+                 "&notice=0&platform=yqq&jsonpCallback=toplistSongList1468337817052&needNewCode=0".format(top_id=top_id)
         try:
+            headers = self.header
+            headers[
+                'Referer'] = "http://i.y.qq.com/v8/fcg-bin/fcg_v8_toplist_cp.fcg?page=detail&type=top&topid={top_id}&format=html&tpl=20".format(
+                top_id=top_id)
+            headers['Host'] = 'i.y.qq.com'
             connection = requests.get(action,
-                                      headers=self.header,
+                                      headers=headers,
                                       timeout=default_timeout)
             connection.encoding = 'UTF-8'
-            songids = re.findall(r'songmid=(\w+)', connection.text)
-            if songids == []:
-                return []
-            # 去重
-            songids = uniq(songids)
-            songs = [self.song_info(song_id) for song_id in songids]
-            songs = [song for song in songs if song]  # 有时候会返回空？
-            return songs
+            json_body = connection.text.split('toplistSongList1468337817052(')[1].strip(')')
+            songs = json.loads(json_body)['songlist']
+            # TODO:slice
+            return [self.song_info(song['data']['songmid'],song['data']) for song in songs]  # 已经包含song_info一样的歌曲信息
         except requests.exceptions.RequestException as e:
             log.error(e)
             return []
@@ -447,17 +452,25 @@ class NetEase(object):
             song_id="C200" + song_id, vkey=vkey)
         return song_url
 
-    def song_info(self, song_id):
-        url = "http://i.y.qq.com/v8/fcg-bin/fcg_play_single_song.fcg?songmid={song_id}&tpl=yqq_song_detail&play=0".format(
-            song_id=song_id)
-        resp = self.session.request('GET', url)
-        song_data = re.findall(r"g_SongData\s?=\s?(\{.+\})", resp.content)
+    def song_info(self, song_id, song_data=None):
+        """
+
+        :param song_id:
+        :param song_data: 获取列表信息时有可能已经返回歌曲信息了，直接使用
+        :return:
+        """
+        if not song_data:
+            url = "http://i.y.qq.com/v8/fcg-bin/fcg_play_single_song.fcg?songmid={song_id}&tpl=yqq_song_detail&play=0".format(
+                song_id=song_id)
+            resp = self.session.request('GET', url)
+            song_data = re.findall(r"g_SongData\s?=\s?(\{.+\})", resp.content)
+            song_data = song_data[0]
+            song_data = json.loads(song_data)
         if not song_data:
             # print("Cannot retrieve song info")  # TODO:empty info
             # print("Resp is " + resp.content)
             return {}
-        song_data = song_data[0]
-        song_data = json.loads(song_data)
+
         song_data['singername'] = song_data['singer'][0]['name']  # TODO:multiple singers?
         return song_data
 
@@ -469,14 +482,16 @@ class NetEase(object):
         """
         action = "http://i.y.qq.com/lyric/fcgi-bin/fcg_query_lyric.fcg?pcachetime={time}&songmid={song_id}&g_tk=938407465" \
                  "&hostUin=0&format=jsonp&inCharset=GB2312&outCharset=utf-8" \
-                 "&notice=0&platform=yqq&jsonpCallback=MusicJsonCallback&needNewCode=0".format(song_id=song_id,time=str(int(time.time()))+"000")
+                 "&notice=0&platform=yqq&jsonpCallback=MusicJsonCallback&needNewCode=0".format(song_id=song_id,
+                                                                                               time=str(int(
+                                                                                                   time.time())) + "000")
         try:
             headers = self.header
             headers['Host'] = 'i.y.qq.com'
-            resp = self.session.request('GET', action,headers=headers)
+            resp = self.session.request('GET', action, headers=headers)
             json_body = resp.content.split('(')[1].strip(")")
             result = json.loads(json_body)
-            if not result or result['retcode']!=0:
+            if not result or result['retcode'] != 0:
                 lyric_info = '未找到歌词'
             else:
                 lyric_info = base64.b64decode(result['lyric'])
@@ -486,7 +501,7 @@ class NetEase(object):
             return []
 
     def song_tlyric(self, music_id):
-        return []# TODO:lyric translation
+        return []  # TODO:lyric translation
         action = 'http://music.163.com/api/song/lyric?os=osx&id={}&lv=-1&kv=-1&tv=-1'.format(  # NOQA
                                                                                                music_id)
         try:
@@ -615,9 +630,9 @@ if __name__ == '__main__':
     ne = NetEase()
     # print geturl_new_api(ne.songs_detail([27902910])[0])  # MD 128k, fallback
     # print ne.get_stream_url('00309Hdu17kB1T')
-    # print ne.top_songlist(0)
+    print ne.top_songlist(0)
     # print ne.song_info('00309Hdu17kB1T')['singername']
-    print ne.song_lyric('00309Hdu17kB1T')
+    # print ne.song_lyric('00309Hdu17kB1T')
     # print ne.dig_info(ne.top_songlist(0),'songs')
     # print ne.songs_detail([405079776])[0]['mp3Url']  # old api
     # print requests.get(ne.songs_detail([405079776])[0][
