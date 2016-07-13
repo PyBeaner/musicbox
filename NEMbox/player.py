@@ -36,7 +36,6 @@ class Player(object):
         self.pause_flag = False
         self.process_length = 0
         self.process_location = 0
-        self.process_first = False
         self.storage = Storage()
         self.info = self.storage.database['player_info']
         self.songs = self.storage.database['songs']
@@ -87,7 +86,6 @@ class Player(object):
             size = popenArgs['size320']
             self.process_length = self._size_to_seconds(size, 320)
 
-            self.process_first = True
             while True:
                 if self.playing_flag is False:
                     break
@@ -98,17 +96,21 @@ class Player(object):
                 # 当前进度
                 if 'ANS_PERCENT_POSITION' in stdout:
                     percentage = stdout.split('=')[1].strip()
+                    # 当前歌曲播放完了
+                    if percentage == '100':
+                        self.popen_handler.stdin.write('quit\n')
+                        self.popen_handler.kill()
+                        break
                     self.process_location = self.process_length * int(percentage) / 100
 
-                if stdout == '@P 0\n':
-                    self.popen_handler.stdin.write('Q\n')
-                    self.popen_handler.kill()
-                    break
+                # if stdout == '@P 0\n':
+                #     self.popen_handler.stdin.write('Q\n')
+                #     self.popen_handler.kill()
+                #     break
 
             if self.playing_flag:
                 self.next_idx()
                 onExit()
-            return
 
         def getLyric():
             if 'lyric' not in self.songs[str(self.playing_id)].keys():
