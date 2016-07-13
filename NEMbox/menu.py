@@ -35,6 +35,7 @@ log = logger.getLogger(__name__)
 
 try:
     import keybinder
+
     BINDABLE = True
 except ImportError:
     BINDABLE = False
@@ -375,7 +376,7 @@ class Menu(object):
             # 随机播放
             elif key == ord('?'):
                 if len(self.storage.database['player_info'][
-                        'player_list']) == 0:
+                           'player_list']) == 0:
                     continue
                 self.player.shuffle()
                 time.sleep(0.1)
@@ -393,7 +394,7 @@ class Menu(object):
             elif key == ord('.'):
                 if self.datatype == 'fmsongs':
                     if len(self.storage.database['player_info'][
-                            'player_list']) == 0:
+                               'player_list']) == 0:
                         continue
                     self.player.next()
                     return_data = self.request_api(
@@ -406,7 +407,7 @@ class Menu(object):
             elif key == ord('/'):
                 if self.datatype == 'fmsongs':
                     if len(self.storage.database['player_info'][
-                            'player_list']) == 0:
+                               'player_list']) == 0:
                         continue
                     if self.player.end_callback:
                         self.player.end_callback()
@@ -418,7 +419,7 @@ class Menu(object):
                 try:
                     if self.datalist[idx]['songmid'] == self.player.playing_id:
                         self.player.play_and_pause(self.storage.database[
-                            'player_info']['idx'])
+                                                       'player_info']['idx'])
                         time.sleep(0.1)
                         continue
                 except (TypeError, KeyError) as e:
@@ -449,7 +450,7 @@ class Menu(object):
                     self.at_playing_list = True
                 else:
                     self.player.play_and_pause(self.storage.database[
-                        'player_info']['idx'])
+                                                   'player_info']['idx'])
                 time.sleep(0.1)
 
             # 加载当前播放列表
@@ -459,8 +460,9 @@ class Menu(object):
             # 播放模式切换
             elif key == ord('P'):
                 self.storage.database['player_info']['playing_mode'] = (
-                    self.storage.database['player_info']['playing_mode'] +
-                    1) % 5
+                                                                           self.storage.database['player_info'][
+                                                                               'playing_mode'] +
+                                                                           1) % 5
 
             # 添加到打碟歌单
             elif key == ord('a'):
@@ -481,7 +483,7 @@ class Menu(object):
             # 添加到本地收藏
             elif key == ord('s'):
                 if (datatype == 'songs' or
-                        datatype == 'djchannels') and len(datalist) != 0:
+                            datatype == 'djchannels') and len(datalist) != 0:
                     self.collection.append(datalist[idx])
                     notify('Added successfully', 0)
 
@@ -497,7 +499,7 @@ class Menu(object):
             # 从当前列表移除
             elif key == ord('r'):
                 if (datatype == 'songs' or
-                        datatype == 'djchannels') and len(datalist) != 0:
+                            datatype == 'djchannels') and len(datalist) != 0:
                     self.datalist.pop(idx)
                     self.index = carousel(offset, min(
                         len(datalist), offset + step) - 1, idx)
@@ -641,25 +643,18 @@ class Menu(object):
             ui = self.ui
             self.index = 0
             self.offset = 0
-            if idx == 0:
-                # 搜索结果可以用top_playlists处理
-                self.datatype = 'top_playlists'
-                self.datalist = ui.build_search('search_playlist')
-                self.title = '精选歌单搜索列表'
-            elif idx == 1:
-                self.datatype = 'songs'
-                self.datalist = ui.build_search('song')
-                self.title = '歌曲搜索列表'
 
-            elif idx == 2:
-                self.datatype = 'artists'
-                self.datalist = ui.build_search('singer')
-                self.title = '歌手搜索列表'
+            titles_by_type = [
+                ('top_playlists', '精选歌单搜索列表'),
+                ('songs', '歌曲搜索列表'),
+                ('artists', '歌手搜索列表'),
+                ('albums', '专辑搜索列表'),
+            ]
 
-            elif idx == 3:
-                self.datatype = 'albums'
-                self.datalist = ui.build_search('album')
-                self.title = '专辑搜索列表'
+            current = titles_by_type[idx]
+            self.datatype = current[0]
+            self.title = current[1]
+            self.datalist = ui.build_search(self.datatype)
 
     def show_playing_song(self):
         if self._is_playlist_empty():
@@ -676,7 +671,7 @@ class Menu(object):
             self.datalist.append(self.storage.database['songs'][i])
         self.index = self.storage.database['player_info']['idx']
         self.offset = self.storage.database['player_info'][
-            'idx'] / self.step * self.step
+                          'idx'] / self.step * self.step
         if self.resume_play:
             if self.datatype == 'fmsongs':
                 self.player.end_callback = self.fm_callback
@@ -706,7 +701,7 @@ class Menu(object):
                 self.datalist.append(self.storage.database['songs'][i])
             self.index = self.storage.database['player_info']['idx']
             self.offset = self.storage.database['player_info'][
-                'idx'] / self.step * self.step
+                              'idx'] / self.step * self.step
 
     def request_api(self, func, *args):
         if self.storage.database['user']['user_id'] != '':
@@ -720,7 +715,7 @@ class Menu(object):
                 self.storage.database['user']['username'],
                 self.storage.database['user']['password'])
         if self.storage.database['user']['username'] == '' or user_info[
-                'code'] != 200:
+            'code'] != 200:
             data = self.ui.build_login()
             # 取消登录
             if data == -1:
