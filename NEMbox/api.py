@@ -113,7 +113,7 @@ class NetEase(object):
             'Accept-Language': 'zh-CN,zh;q=0.8,gl;q=0.6,zh-TW;q=0.4',
             'Connection': 'keep-alive',
             'Content-Type': 'application/x-www-form-urlencoded',
-            'Host': 'y.qq.com',
+            'Host': 'i.y.qq.com',
             'Referer': 'http://y.qq.com',
             'User-Agent':
                 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/33.0.1750.152 Safari/537.36'
@@ -313,10 +313,12 @@ class NetEase(object):
             return -1
 
     # 搜索单曲(1)，歌手(100)，专辑(10)，歌单(1000)，用户(1002) *(type)*
-    def search(self, s, stype=1, offset=0, total='true', limit=60):
-        action = 'http://music.163.com/api/search/get'
+    def search(self, key, stype=1, offset=0, total='true', limit=60):
+        action = "http://i.y.qq.com/s.plcloud/fcgi-bin/smartbox_new.fcg?utf8=1&is_xml=0&key={key}" \
+                 "&g_tk=1371149499&format=jsonp&inCharset=GB2312&outCharset=utf-8&notice=0&platform=yqq" \
+                 "&jsonpCallback=MusicJsonCallBack&needNewCode=0".format(key=key)
         data = {
-            's': s,
+            's': key,
             'type': stype,
             'offset': offset,
             'total': total,
@@ -399,7 +401,6 @@ class NetEase(object):
             headers[
                 'Referer'] = "http://i.y.qq.com/v8/fcg-bin/fcg_v8_toplist_cp.fcg?page=detail&type=top&topid={top_id}&format=html&tpl=20".format(
                 top_id=top_id)
-            headers['Host'] = 'i.y.qq.com'
             connection = requests.get(action,
                                       headers=headers,
                                       timeout=default_timeout)
@@ -407,7 +408,7 @@ class NetEase(object):
             json_body = connection.text.split('toplistSongList1468337817052(')[1].strip(')')
             songs = json.loads(json_body)['songlist']
             # TODO:slice
-            return [self.song_info(song['data']['songmid'],song['data']) for song in songs]  # 已经包含song_info一样的歌曲信息
+            return [self.song_info(song['data']['songmid'], song['data']) for song in songs]  # 已经包含song_info一样的歌曲信息
         except requests.exceptions.RequestException as e:
             log.error(e)
             return []
@@ -439,7 +440,7 @@ class NetEase(object):
         :return:
         """
         config_url = "http://base.music.qq.com/fcgi-bin/fcg_musicexpress.fcg?json=3&guid=5746725496&g_tk=178887276" \
-                     "&hostUin=0&format=jsonp&inCharset=GB2312&outCharset=GB2312&notice=0&platform=yqq" \
+                     "&format=jsonp&inCharset=GB2312&outCharset=GB2312&notice=0&platform=yqq" \
                      "&jsonpCallback=jsonCallback&needNewCode=0"
         resp = self.session.get(config_url)
         json_body = resp.content.split('(')[1].strip(');')
@@ -481,13 +482,12 @@ class NetEase(object):
         :return:
         """
         action = "http://i.y.qq.com/lyric/fcgi-bin/fcg_query_lyric.fcg?pcachetime={time}&songmid={song_id}&g_tk=938407465" \
-                 "&hostUin=0&format=jsonp&inCharset=GB2312&outCharset=utf-8" \
+                 "&format=jsonp&inCharset=GB2312&outCharset=utf-8" \
                  "&notice=0&platform=yqq&jsonpCallback=MusicJsonCallback&needNewCode=0".format(song_id=song_id,
                                                                                                time=str(int(
                                                                                                    time.time())) + "000")
         try:
             headers = self.header
-            headers['Host'] = 'i.y.qq.com'
             resp = self.session.request('GET', action, headers=headers)
             json_body = resp.content.split('(')[1].strip(")")
             result = json.loads(json_body)
@@ -630,7 +630,8 @@ if __name__ == '__main__':
     ne = NetEase()
     # print geturl_new_api(ne.songs_detail([27902910])[0])  # MD 128k, fallback
     # print ne.get_stream_url('00309Hdu17kB1T')
-    print ne.top_songlist(0)
+    print
+    ne.top_songlist(0)
     # print ne.song_info('00309Hdu17kB1T')['singername']
     # print ne.song_lyric('00309Hdu17kB1T')
     # print ne.dig_info(ne.top_songlist(0),'songs')

@@ -820,7 +820,7 @@ class Menu(object):
         elif idx == 8:
             self.datatype = 'search'
             self.title += ' > 搜索'
-            self.datalist = ['歌曲', '艺术家', '专辑', '网易精选集']
+            self.datalist = ['歌曲', '歌手', '专辑', '精选集']
 
         # 帮助
         elif idx == 9:
