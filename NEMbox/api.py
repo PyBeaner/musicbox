@@ -11,7 +11,6 @@ import os
 import json
 import time
 import hashlib
-import random
 import base64
 
 from Crypto.Cipher import AES
@@ -19,7 +18,6 @@ from cookielib import LWPCookieJar
 from bs4 import BeautifulSoup
 import requests
 
-from config import Config
 from storage import Storage
 from utils import notify
 import logger
@@ -86,8 +84,7 @@ def rsaEncrypt(text, pubKey, modulus):
 
 
 def createSecretKey(size):
-    return (
-               ''.join(map(lambda xx: (hex(ord(xx))[2:]), os.urandom(size))))[0:16]
+    return (''.join(map(lambda xx: (hex(ord(xx))[2:]), os.urandom(size))))[0:16]
 
 
 # list去重
@@ -312,7 +309,6 @@ class NetEase(object):
             log.error(e)
             return -1
 
-    # 搜索单曲(1)，歌手(100)，专辑(10)，歌单(1000)，用户(1002) *(type)*
     def search(self, key, stype='songs', offset=0, total='true', limit=60):
         action = "http://i.y.qq.com/s.plcloud/fcgi-bin/smartbox_new.fcg?utf8=1&is_xml=0&key={key}" \
                  "&g_tk=1371149499&format=jsonp&inCharset=GB2312&outCharset=utf-8&notice=0&platform=yqq" \

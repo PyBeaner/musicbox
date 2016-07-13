@@ -122,6 +122,7 @@ class Player(object):
             if lyric == [] or lyric == '未找到歌词':
                 return
             lyric = lyric.split('\n')
+            lyric = [line for line in lyric if not line.endswith(']')]
             self.songs[str(self.playing_id)]['lyric'] = lyric
             return
 
