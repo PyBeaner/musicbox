@@ -393,8 +393,7 @@ class Menu(object):
             # 删除FM
             elif key == ord('.'):
                 if self.datatype == 'fmsongs':
-                    if len(self.storage.database['player_info'][
-                               'player_list']) == 0:
+                    if len(self.storage.database['player_info']['player_list']) == 0:
                         continue
                     self.player.next()
                     return_data = self.request_api(
@@ -406,8 +405,7 @@ class Menu(object):
             # 下一FM
             elif key == ord('/'):
                 if self.datatype == 'fmsongs':
-                    if len(self.storage.database['player_info'][
-                               'player_list']) == 0:
+                    if len(self.storage.database['player_info']['player_list']) == 0:
                         continue
                     if self.player.end_callback:
                         self.player.end_callback()
@@ -418,8 +416,7 @@ class Menu(object):
                 # If not open a new playing list, just play and pause.
                 try:
                     if self.datalist[idx]['songmid'] == self.player.playing_id:
-                        self.player.play_and_pause(self.storage.database[
-                                                       'player_info']['idx'])
+                        self.player.play_and_pause(self.storage.database['player_info']['idx'])
                         time.sleep(0.1)
                         continue
                 except (TypeError, KeyError) as e:
@@ -692,10 +689,8 @@ class Menu(object):
         if self.datatype == 'fmsongs':
             if self._is_playlist_empty():
                 return
-            self.datatype = self.storage.database['player_info'][
-                'player_list_type']
-            self.title = self.storage.database['player_info'][
-                'player_list_title']
+            self.datatype = self.storage.database['player_info']['player_list_type']
+            self.title = self.storage.database['player_info']['player_list_title']
             self.datalist = []
             for i in self.storage.database['player_info']['player_list']:
                 self.datalist.append(self.storage.database['songs'][i])

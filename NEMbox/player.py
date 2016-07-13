@@ -275,11 +275,7 @@ class Player(object):
         self.popen_handler.stdin.write('pause\n')
 
         item = self.songs[self.info['player_list'][self.info['idx']]]
-        self.ui.build_playinfo(item['songname'],
-                               item['singername'],
-                               item['albumname'],
-                               item['quality'],
-                               time.time(),
+        self.ui.build_playinfo(item['songname'], item['singername'], item['albumname'], item['quality'], time.time(),
                                pause=True)
 
     def resume(self):
@@ -287,9 +283,7 @@ class Player(object):
         self.popen_handler.stdin.write('pause\n')  # same as 'pause'
 
         item = self.songs[self.info['player_list'][self.info['idx']]]
-        self.ui.build_playinfo(item['songname'], item['singername'],
-                               item['albumname'], item['quality'],
-                               time.time())
+        self.ui.build_playinfo(item['songname'], item['singername'], item['albumname'], item['quality'], time.time())
         self.playing_id = item['songmid']
 
     def _swap_song(self):
