@@ -410,27 +410,12 @@ class Ui(object):
             if song_name == '/return':
                 return []
             else:
-                try:
-                    data = netease.search(song_name, stype=1)
-                    song_ids = []
-                    if 'songs' in data['result']:
-                        if 'mp3Url' in data['result']['songs']:
-                            songs = data['result']['songs']
-
-                        # if search song result do not has mp3Url
-                        # send ids to get mp3Url
-                        else:
-                            for i in range(0, len(data['result']['songs'])):
-                                song_ids.append(data['result']['songs'][i][
-                                                    'id'])
-                            songs = netease.songs_detail(song_ids)
-                        return netease.dig_info(songs, 'songs')
-                except Exception as e:
-                    log.error(e)
-                    return []
+                songs = netease.search(song_name, stype=1)
+                songs = [netease.song_info(song['mid']) for song in songs]
+                return netease.dig_info(songs, 'songs')
 
         elif stype == 'artists':
-            artist_name = self.get_param('搜索艺术家：')
+            artist_name = self.get_param('搜索歌手：')
             if artist_name == '/return':
                 return []
             else:
@@ -458,7 +443,7 @@ class Ui(object):
                     return []
 
         elif stype == 'search_playlist':
-            search_playlist = self.get_param('搜索网易精选集：')
+            search_playlist = self.get_param('搜索精选集：')
             if search_playlist == '/return':
                 return []
             else:
