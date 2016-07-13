@@ -119,16 +119,13 @@ class Ui(object):
             total_length = 1
         if now_playing > total_length or now_playing <= 0:
             now_playing = 0
+        # 进度条 ［>>>>    ］
         process = '['
-        for i in range(0, 33):
-            if i < now_playing / total_length * 33:
-                if (i + 1) > now_playing / total_length * 33:
-                    if not pause_flag:
-                        process += '>'
-                        continue
-                process += '='
-            else:
-                process += ' '
+        arrow_count = int(now_playing / (total_length * 1.0) * 33)
+        process += '>' * arrow_count
+        if pause_flag:
+            process += '='
+        process += (33 - arrow_count) * ' '
         process += '] '
         now_minute = int(now_playing / 60)
         if now_minute > 9:
@@ -264,7 +261,7 @@ class Ui(object):
                             i - offset + 8, self.startcol,
                             '{}. {}{}{}  < {} >'.format(
                                 i, datalist[i]['songname'], self.space,
-                                datalist[i]['singername'],# TODO:get singer name
+                                datalist[i]['singername'],  # TODO:get singer name
                                 datalist[i]['albumname'])[:int(self.x * 2)])
 
                 self.screen.addstr(iter_range - offset + 8, 0, ' ' * self.x)
@@ -411,7 +408,7 @@ class Ui(object):
             prompt = '搜索歌手：'
         elif stype == 'albums':
             prompt = '搜索专辑：'
-        elif stype == 'search_playlist':# TODO:mv
+        elif stype == 'search_playlist':  # TODO:mv
             prompt = '搜索精选集：'
         else:
             return []

@@ -101,7 +101,7 @@ class Player(object):
                         self.popen_handler.stdin.write('quit\n')
                         self.popen_handler.kill()
                         break
-                    self.process_location = self.process_length * int(percentage) / 100
+                    self.process_location = int(self.process_length * int(percentage) / 100)
 
                 # if stdout == '@P 0\n':
                 #     self.popen_handler.stdin.write('Q\n')
