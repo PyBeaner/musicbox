@@ -103,10 +103,10 @@ class Player(object):
                         break
                     self.process_location = int(self.process_length * int(percentage) / 100)
 
-                # if stdout == '@P 0\n':
-                #     self.popen_handler.stdin.write('Q\n')
-                #     self.popen_handler.kill()
-                #     break
+                    # if stdout == '@P 0\n':
+                    #     self.popen_handler.stdin.write('Q\n')
+                    #     self.popen_handler.kill()
+                    #     break
 
             if self.playing_flag:
                 self.next_idx()
@@ -405,24 +405,26 @@ class Player(object):
         self.info['idx'] = self.info['playing_list'][self.info['ridx']]
         self.recall()
 
+    # 更改音量
     def volume_up(self):
-        self.info['playing_volume'] = self.info['playing_volume'] + 7
-        if (self.info['playing_volume'] > 100):
-            self.info['playing_volume'] = 100
+        volume = self.info['playing_volume']
+        volume += 7
+        if volume > 100:
+            volume = 100
+        self.info['playing_volume'] = volume
         if not self.playing_flag:
             return
-        self.popen_handler.stdin.write('V ' + str(self.info[
-                                                      'playing_volume']) + '\n')
+        self.popen_handler.stdin.write('volume ' + str(volume) + '\n')
 
     def volume_down(self):
-        self.info['playing_volume'] = self.info['playing_volume'] - 7
-        if (self.info['playing_volume'] < 0):
-            self.info['playing_volume'] = 0
+        volume = self.info['playing_volume']
+        volume -= 7
+        if volume < 0:
+            volume = 0
+        self.info['playing_volume'] = volume
         if not self.playing_flag:
             return
-
-        self.popen_handler.stdin.write('V ' + str(self.info[
-                                                      'playing_volume']) + '\n')
+        self.popen_handler.stdin.write('volume ' + str(volume) + '\n')
 
     def update_size(self):
         try:
