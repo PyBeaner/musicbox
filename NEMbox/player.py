@@ -78,9 +78,8 @@ class Player(object):
                                                   stdin=subprocess.PIPE,
                                                   stdout=subprocess.PIPE,
                                                   stderr=subprocess.PIPE)
-            self.popen_handler.stdin.write('V ' + str(self.info[
-                                                          'playing_volume']) + '\n')
-            self.popen_handler.stdin.write(stream_url)
+            self.popen_handler.stdin.write('volumn ' + str(self.info[
+                                                               'playing_volume']) + '\n')
 
             # get seconds of the song
             size = popenArgs['size320']
@@ -90,23 +89,18 @@ class Player(object):
                 if self.playing_flag is False:
                     break
 
-                self.popen_handler.stdin.write('get_percent_pos\n')
-                stdout = self.popen_handler.stdout.readline()
+                self.popen_handler.stdin.write('get_percent_pos\n')# 导致无法暂停
+                output = self.popen_handler.stdout.readline()
                 # TODO:why it takes two seconds to update the position
                 # 当前进度
-                if 'ANS_PERCENT_POSITION' in stdout:
-                    percentage = stdout.split('=')[1].strip()
+                if 'ANS_PERCENT_POSITION' in output:
+                    percentage = output.split('=')[1].strip()
                     # 当前歌曲播放完了
                     if percentage == '100':
                         self.popen_handler.stdin.write('quit\n')
                         self.popen_handler.kill()
                         break
                     self.process_location = int(self.process_length * int(percentage) / 100)
-
-                    # if stdout == '@P 0\n':
-                    #     self.popen_handler.stdin.write('Q\n')
-                    #     self.popen_handler.kill()
-                    #     break
 
             if self.playing_flag:
                 self.next_idx()
