@@ -646,20 +646,19 @@ class Menu(object):
                 self.datatype = 'top_playlists'
                 self.datalist = ui.build_search('search_playlist')
                 self.title = '精选歌单搜索列表'
-
             elif idx == 1:
                 self.datatype = 'songs'
-                self.datalist = ui.build_search('songs')
+                self.datalist = ui.build_search('song')
                 self.title = '歌曲搜索列表'
 
             elif idx == 2:
                 self.datatype = 'artists'
-                self.datalist = ui.build_search('artists')
-                self.title = '艺术家搜索列表'
+                self.datalist = ui.build_search('singer')
+                self.title = '歌手搜索列表'
 
             elif idx == 3:
                 self.datatype = 'albums'
-                self.datalist = ui.build_search('albums')
+                self.datalist = ui.build_search('album')
                 self.title = '专辑搜索列表'
 
     def show_playing_song(self):

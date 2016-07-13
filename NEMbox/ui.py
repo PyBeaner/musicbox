@@ -405,58 +405,24 @@ class Ui(object):
     def build_search(self, stype):
         self.screen.timeout(-1)
         netease = self.netease
-        if stype == 'songs':
-            song_name = self.get_param('搜索歌曲：')
-            if song_name == '/return':
-                return []
-            else:
-                songs = netease.search(song_name, stype=1)
-                songs = [netease.song_info(song['mid']) for song in songs]
-                return netease.dig_info(songs, 'songs')
+        if stype == 'song':
+            prompt = '搜索歌曲：'
+        elif stype == 'singer':
+            prompt = '搜索歌手：'
+        elif stype == 'album':
+            prompt = '搜索专辑：'
+        elif stype == 'search_playlist':# TODO:mv
+            prompt = '搜索精选集：'
+        else:
+            return []
 
-        elif stype == 'artists':
-            artist_name = self.get_param('搜索歌手：')
-            if artist_name == '/return':
-                return []
-            else:
-                try:
-                    data = netease.search(artist_name, stype=100)
-                    if 'artists' in data['result']:
-                        artists = data['result']['artists']
-                        return netease.dig_info(artists, 'artists')
-                except Exception as e:
-                    log.error(e)
-                    return []
-
-        elif stype == 'albums':
-            albums_name = self.get_param('搜索专辑：')
-            if albums_name == '/return':
-                return []
-            else:
-                try:
-                    data = netease.search(albums_name, stype=10)
-                    if 'albums' in data['result']:
-                        albums = data['result']['albums']
-                        return netease.dig_info(albums, 'albums')
-                except Exception as e:
-                    log.error(e)
-                    return []
-
-        elif stype == 'search_playlist':
-            search_playlist = self.get_param('搜索精选集：')
-            if search_playlist == '/return':
-                return []
-            else:
-                try:
-                    data = netease.search(search_playlist, stype=1000)
-                    if 'playlists' in data['result']:
-                        playlists = data['result']['playlists']
-                        return netease.dig_info(playlists, 'top_playlists')
-                except Exception as e:
-                    log.error(e)
-                    return []
-
-        return []
+        search_key = self.get_param(prompt)
+        if search_key == '/return':
+            return []
+        else:
+            data = netease.search(search_key, stype=stype)
+            data = [netease.song_info(song['mid']) for song in data]
+            return netease.dig_info(data, stype)
 
     def build_login(self):
         self.build_login_bar()

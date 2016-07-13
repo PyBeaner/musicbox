@@ -313,23 +313,17 @@ class NetEase(object):
             return -1
 
     # 搜索单曲(1)，歌手(100)，专辑(10)，歌单(1000)，用户(1002) *(type)*
-    def search(self, key, stype=1, offset=0, total='true', limit=60):
+    def search(self, key, stype='song', offset=0, total='true', limit=60):
         action = "http://i.y.qq.com/s.plcloud/fcgi-bin/smartbox_new.fcg?utf8=1&is_xml=0&key={key}" \
                  "&g_tk=1371149499&format=jsonp&inCharset=GB2312&outCharset=utf-8&notice=0&platform=yqq" \
                  "&jsonpCallback=MusicJsonCallBack&needNewCode=0".format(key=key)
         resp =  self.session.get(action)
         json_body = resp.text.split('MusicJsonCallBack(')[1].strip(')')
         data = json.loads(json_body)['data']
-        if stype==1:
-            result = data['song']
-        elif stype==10:
-            result = data['album']
-        elif stype==100:
-            result = data['singer']
-        else:
-            return
+        result = data.get(stype,[])
+        if not result:
+            return []
         return result['itemlist']
-
 
 
     # 新碟上架 http://music.163.com/#/discover/album/
@@ -637,7 +631,7 @@ if __name__ == '__main__':
     # print geturl_new_api(ne.songs_detail([27902910])[0])  # MD 128k, fallback
     # print ne.get_stream_url('00309Hdu17kB1T')
     # print ne.top_songlist(0)
-    print(ne.search('eason',1))
+    print(ne.search('eason','song'))
     # print ne.song_info('00309Hdu17kB1T')['singername']
     # print ne.song_lyric('00309Hdu17kB1T')
     # print ne.dig_info(ne.top_songlist(0),'songs')
