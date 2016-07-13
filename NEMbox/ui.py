@@ -405,11 +405,11 @@ class Ui(object):
     def build_search(self, stype):
         self.screen.timeout(-1)
         netease = self.netease
-        if stype == 'song':
+        if stype == 'songs':
             prompt = '搜索歌曲：'
-        elif stype == 'singer':
+        elif stype == 'artists':
             prompt = '搜索歌手：'
-        elif stype == 'album':
+        elif stype == 'albums':
             prompt = '搜索专辑：'
         elif stype == 'search_playlist':# TODO:mv
             prompt = '搜索精选集：'
