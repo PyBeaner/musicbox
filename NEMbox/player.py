@@ -78,8 +78,8 @@ class Player(object):
                                                   stdin=subprocess.PIPE,
                                                   stdout=subprocess.PIPE,
                                                   stderr=subprocess.PIPE)
-            self.popen_handler.stdin.write('volumn ' + str(self.info[
-                                                               'playing_volume']) + '\n')
+
+            self.popen_handler.communicate('volume ' + str(self.info['playing_volume']) + '\n')
 
             # get seconds of the song
             size = popenArgs['size320']
@@ -89,15 +89,15 @@ class Player(object):
                 if self.playing_flag is False:
                     break
 
-                self.popen_handler.stdin.write('get_percent_pos\n')# 导致无法暂停
-                output = self.popen_handler.stdout.readline()
+                # self.popen_handler.communicate('get_percent_pos\n')# 导致无法暂停
+                output, error = self.popen_handler.communicate('get_percent_pos\n')
                 # TODO:why it takes two seconds to update the position
                 # 当前进度
                 if 'ANS_PERCENT_POSITION' in output:
                     percentage = output.split('=')[1].strip()
                     # 当前歌曲播放完了
                     if percentage == '100':
-                        self.popen_handler.stdin.write('quit\n')
+                        self.popen_handler.communicate('quit\n')
                         self.popen_handler.kill()
                         break
                     self.process_location = int(self.process_length * int(percentage) / 100)
@@ -255,7 +255,7 @@ class Player(object):
     def stop(self):
         if self.playing_flag and self.popen_handler:
             self.playing_flag = False
-            self.popen_handler.stdin.write('quit\n')  # Quit
+            self.popen_handler.communicate('quit\n')  # Quit
             try:
                 self.popen_handler.kill()
             except OSError as e:
@@ -266,7 +266,7 @@ class Player(object):
         if not self.playing_flag and not self.popen_handler:
             return
         self.pause_flag = True
-        self.popen_handler.stdin.write('pause\n')
+        self.popen_handler.communicate('pause\n')
 
         item = self.songs[self.info['player_list'][self.info['idx']]]
         self.ui.build_playinfo(item['songname'], item['singername'], item['albumname'], item['quality'], time.time(),
@@ -274,7 +274,7 @@ class Player(object):
 
     def resume(self):
         self.pause_flag = False
-        self.popen_handler.stdin.write('pause\n')  # same as 'pause'
+        self.popen_handler.communicate('pause\n')  # same as 'pause'
 
         item = self.songs[self.info['player_list'][self.info['idx']]]
         self.ui.build_playinfo(item['songname'], item['singername'], item['albumname'], item['quality'], time.time())
@@ -402,7 +402,7 @@ class Player(object):
         self.info['playing_volume'] = volume
         if not self.playing_flag:
             return
-        self.popen_handler.stdin.write('volume ' + str(volume) + '\n')
+        self.popen_handler.communicate('volume ' + str(volume) + '\n')
 
     def volume_down(self):
         volume = self.info['playing_volume']
@@ -412,7 +412,7 @@ class Player(object):
         self.info['playing_volume'] = volume
         if not self.playing_flag:
             return
-        self.popen_handler.stdin.write('volume ' + str(volume) + '\n')
+        self.popen_handler.communicate('volume ' + str(volume) + '\n')
 
     def update_size(self):
         try:
