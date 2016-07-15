@@ -79,6 +79,8 @@ class Player(object):
                                                   stdout=subprocess.PIPE,
                                                   stderr=subprocess.PIPE)
 
+            # 不知道为何进程会很快结束，导致无法communicate？
+
             self.popen_handler.communicate('volume ' + str(self.info['playing_volume']) + '\n')
 
             # get seconds of the song
@@ -89,7 +91,12 @@ class Player(object):
                 if self.playing_flag is False:
                     break
 
-                # self.popen_handler.communicate('get_percent_pos\n')# 导致无法暂停
+                if self.popen_handler.poll():
+                    # terminated
+                    break
+
+                #  导致无法暂停?
+                # TODO:pipe closed?
                 output, error = self.popen_handler.communicate('get_percent_pos\n')
                 # TODO:why it takes two seconds to update the position
                 # 当前进度
