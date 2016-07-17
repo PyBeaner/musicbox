@@ -88,15 +88,16 @@ class Player(object):
                 self.popen_handler.stdin.write('get_percent_pos\n')  # 导致无法暂停
                 output = self.popen_handler.stdout.readline()
                 # TODO:why it takes two seconds to update the position
-                # 当前进度
-                if 'ANS_PERCENT_POSITION' in output:
-                    percentage = output.split('=')[1].strip()
+                # 当前进度:A:  11.9 (11.9) of 270.6 (04:30.6)  0.5% 60%
+                # TODO:'A:'不一定指进度
+                if 'A:' in output:
+                    second = output.split('(')[1].split(')')[0]
                     # 当前歌曲播放完了
-                    if percentage == '100':
-                        self.popen_handler.stdin.write('quit\n')
-                        self.popen_handler.kill()
-                        break
-                    self.process_location = int(self.process_length * int(percentage) / 100)
+                    # if second == '100':
+                    #     self.popen_handler.stdin.write('quit\n')
+                    #     self.popen_handler.kill()
+                    #     break
+                    self.process_location = int(float(second))
 
             if self.playing_flag:
                 self.next_idx()
@@ -458,14 +459,11 @@ class Player(object):
 
 if __name__ == '__main__':
     print(Player._size_to_seconds(11319601, 320))
-    stream_url = "http://ws.stream.qqmusic.qq.com/C20000309Hdu17kB1T.m4a?vkey=C94E8B7EDF49D0824211DC171152DF32AEE5BD2979B85A216C54D4D1CF905362085B9FACE7A6F2DFAA18B1633698E6E5B0BD8919C852DFF2&guid=5746725496&fromtag=30"
+    stream_url = get_stream_url("00309Hdu17kB1T")
     para = ['mplayer', '-slave', '-input', 'file=/tmp/mplayer.fifo', stream_url]
-    # para = ['/usr/local/bin/mpg123','-R']
     popen_handler = subprocess.Popen(para,
                                      stdin=subprocess.PIPE,
                                      stdout=subprocess.PIPE,
                                      stderr=subprocess.PIPE)
     while True:
-        print(popen_handler.stdout.readline())
-        print(popen_handler.stdin.write('get_percent_pos\n'))
-        time.sleep(0.5)
+        time.sleep(1)
