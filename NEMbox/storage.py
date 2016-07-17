@@ -72,7 +72,8 @@ class Storage(Singleton):
                 'idx': 0,
                 'ridx': 0,
                 'playing_volume': 60,
-            }
+            },
+            'vkey': ''
         }
         self.storage_path = Constant.storage_path
         self.cookie_path = Constant.cookie_path
@@ -112,3 +113,9 @@ class Storage(Singleton):
         self.file = file(self.storage_path, 'w')
         self.file.write(json.dumps(self.database))
         self.file.close()
+
+    def last_modified_time(self):
+        import os
+        if not os.path.exists(self.storage_path):
+            self.save()
+        return os.path.getmtime(self.storage_path)

@@ -435,15 +435,21 @@ class NetEase(object):
         :param song_id:
         :return:
         """
-        config_url = "http://base.music.qq.com/fcgi-bin/fcg_musicexpress.fcg?json=3&guid=5746725496&g_tk=178887276" \
-                     "&format=jsonp&inCharset=GB2312&outCharset=GB2312&notice=0&platform=yqq" \
-                     "&jsonpCallback=jsonCallback&needNewCode=0"
-        resp = self.session.get(config_url)
-        json_body = resp.content.split('(')[1].strip(');')
-        config = json.loads(json_body)
-        if not config or config['code'] != 0:
-            notify('无法获取歌曲播放地址')
-        vkey = config['key']
+        mtime = self.storage.last_modified_time()
+        ctime = time.time()
+        if ctime - mtime < 3600:
+            # vkey在一定有效时间能通用
+            vkey = self.storage.database['vkey']
+        else:
+            config_url = "http://base.music.qq.com/fcgi-bin/fcg_musicexpress.fcg?json=3&guid=5746725496&g_tk=178887276" \
+                         "&format=jsonp&inCharset=GB2312&outCharset=GB2312&notice=0&platform=yqq" \
+                         "&jsonpCallback=jsonCallback&needNewCode=0"
+            resp = self.session.get(config_url)
+            json_body = resp.content.split('(')[1].strip(');')
+            config = json.loads(json_body)
+            if not config or config['code'] != 0:
+                notify('无法获取歌曲播放地址')
+            vkey = config['key']
         # TODO:C200?
         song_url = "http://ws.stream.qqmusic.qq.com/{song_id}.m4a?vkey={vkey}&guid=5746725496&fromtag=30".format(
             song_id="C200" + song_id, vkey=vkey)
@@ -625,9 +631,9 @@ class NetEase(object):
 if __name__ == '__main__':
     ne = NetEase()
     # print geturl_new_api(ne.songs_detail([27902910])[0])  # MD 128k, fallback
-    # print ne.get_stream_url('00309Hdu17kB1T')
+    print ne.get_stream_url('00309Hdu17kB1T')
     # print ne.top_songlist(0)
-    print(ne.search('eason', 'songs'))
+    # print(ne.search('eason', 'songs'))
     # print ne.song_info('00309Hdu17kB1T')['singername']
     # print ne.song_lyric('00309Hdu17kB1T')
     # print ne.dig_info(ne.top_songlist(0),'songs')

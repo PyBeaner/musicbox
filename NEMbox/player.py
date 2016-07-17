@@ -42,7 +42,6 @@ class Player(object):
         self.playing_id = -1
         self.cache = Cache()
         self.notifier = self.config.get_item('notifier')
-        self.mpg123_parameters = self.config.get_item('mpg123_parameters')
         self.end_callback = None
         self.playing_song_changed_callback = None
 
@@ -74,14 +73,9 @@ class Player(object):
                 os.mkfifo(fifo)
             # see Slave Mode:https://www.mplayerhq.hu/DOCS/tech/slave.txt
             para = ['mplayer', '-slave', '-input', 'file=' + fifo, stream_url]
-            self.popen_handler = subprocess.Popen(para,
-                                                  stdin=subprocess.PIPE,
-                                                  stdout=subprocess.PIPE,
+            self.popen_handler = subprocess.Popen(para, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                                                   stderr=subprocess.PIPE)
-
-            # 不知道为何进程会很快结束，导致无法communicate？
-
-            self.popen_handler.communicate('volume ' + str(self.info['playing_volume']) + '\n')
+            self.popen_handler.stdin.write('volume ' + str(self.info['playing_volume']) + '\n')
 
             # get seconds of the song
             size = popenArgs['size320']
@@ -91,20 +85,15 @@ class Player(object):
                 if self.playing_flag is False:
                     break
 
-                if self.popen_handler.poll():
-                    # terminated
-                    break
-
-                #  导致无法暂停?
-                # TODO:pipe closed?
-                output, error = self.popen_handler.communicate('get_percent_pos\n')
+                self.popen_handler.stdin.write('get_percent_pos\n')  # 导致无法暂停
+                output = self.popen_handler.stdout.readline()
                 # TODO:why it takes two seconds to update the position
                 # 当前进度
                 if 'ANS_PERCENT_POSITION' in output:
                     percentage = output.split('=')[1].strip()
                     # 当前歌曲播放完了
                     if percentage == '100':
-                        self.popen_handler.communicate('quit\n')
+                        self.popen_handler.stdin.write('quit\n')
                         self.popen_handler.kill()
                         break
                     self.process_location = int(self.process_length * int(percentage) / 100)
@@ -188,8 +177,8 @@ class Player(object):
             self.ui.notify('Now playing', item['songname'],
                            item['albumname'], item['singername'])
         self.playing_id = item['songmid']
-        if 'mp3_url' not in item:  # 获取音频流地址比较慢，所以没有预先全部获取
-            item['mp3_url'] = get_stream_url(item['songmid'])
+        # 不使用缓存下来的地址：会导致无法播放
+        item['mp3_url'] = get_stream_url(item['songmid'])
         self.popen_recall(self.recall, item)
 
     def generate_shuffle_playing_list(self):
@@ -262,7 +251,7 @@ class Player(object):
     def stop(self):
         if self.playing_flag and self.popen_handler:
             self.playing_flag = False
-            self.popen_handler.communicate('quit\n')  # Quit
+            self.popen_handler.stdin.write('quit\n')  # Quit
             try:
                 self.popen_handler.kill()
             except OSError as e:
@@ -273,7 +262,7 @@ class Player(object):
         if not self.playing_flag and not self.popen_handler:
             return
         self.pause_flag = True
-        self.popen_handler.communicate('pause\n')
+        self.popen_handler.stdin.write('pause\n')
 
         item = self.songs[self.info['player_list'][self.info['idx']]]
         self.ui.build_playinfo(item['songname'], item['singername'], item['albumname'], item['quality'], time.time(),
@@ -281,7 +270,7 @@ class Player(object):
 
     def resume(self):
         self.pause_flag = False
-        self.popen_handler.communicate('pause\n')  # same as 'pause'
+        self.popen_handler.stdin.write('pause\n')  # same as 'pause'
 
         item = self.songs[self.info['player_list'][self.info['idx']]]
         self.ui.build_playinfo(item['songname'], item['singername'], item['albumname'], item['quality'], time.time())
@@ -409,7 +398,7 @@ class Player(object):
         self.info['playing_volume'] = volume
         if not self.playing_flag:
             return
-        self.popen_handler.communicate('volume ' + str(volume) + '\n')
+        self.popen_handler.stdin.write('volume ' + str(volume) + '\n')
 
     def volume_down(self):
         volume = self.info['playing_volume']
@@ -419,7 +408,7 @@ class Player(object):
         self.info['playing_volume'] = volume
         if not self.playing_flag:
             return
-        self.popen_handler.communicate('volume ' + str(volume) + '\n')
+        self.popen_handler.stdin.write('volume ' + str(volume) + '\n')
 
     def update_size(self):
         try:
@@ -469,3 +458,14 @@ class Player(object):
 
 if __name__ == '__main__':
     print(Player._size_to_seconds(11319601, 320))
+    stream_url = "http://ws.stream.qqmusic.qq.com/C20000309Hdu17kB1T.m4a?vkey=C94E8B7EDF49D0824211DC171152DF32AEE5BD2979B85A216C54D4D1CF905362085B9FACE7A6F2DFAA18B1633698E6E5B0BD8919C852DFF2&guid=5746725496&fromtag=30"
+    para = ['mplayer', '-slave', '-input', 'file=/tmp/mplayer.fifo', stream_url]
+    # para = ['/usr/local/bin/mpg123','-R']
+    popen_handler = subprocess.Popen(para,
+                                     stdin=subprocess.PIPE,
+                                     stdout=subprocess.PIPE,
+                                     stderr=subprocess.PIPE)
+    while True:
+        print(popen_handler.stdout.readline())
+        print(popen_handler.stdin.write('get_percent_pos\n'))
+        time.sleep(0.5)
