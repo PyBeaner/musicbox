@@ -437,10 +437,11 @@ class NetEase(object):
         """
         mtime = self.storage.last_modified_time()
         ctime = time.time()
+        vkey = ''
         if ctime - mtime < 3600:
             # vkey在一定有效时间能通用
             vkey = self.storage.database['vkey']
-        else:
+        if not vkey:
             config_url = "http://base.music.qq.com/fcgi-bin/fcg_musicexpress.fcg?json=3&guid=5746725496&g_tk=178887276" \
                          "&format=jsonp&inCharset=GB2312&outCharset=GB2312&notice=0&platform=yqq" \
                          "&jsonpCallback=jsonCallback&needNewCode=0"
@@ -450,6 +451,9 @@ class NetEase(object):
             if not config or config['code'] != 0:
                 notify('无法获取歌曲播放地址')
             vkey = config['key']
+            # save the latest vkey
+            self.storage.database['vkey'] = vkey
+            self.storage.save()
         # TODO:C200?
         song_url = "http://ws.stream.qqmusic.qq.com/{song_id}.m4a?vkey={vkey}&guid=5746725496&fromtag=30".format(
             song_id="C200" + song_id, vkey=vkey)
