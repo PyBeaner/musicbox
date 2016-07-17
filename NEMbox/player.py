@@ -81,24 +81,20 @@ class Player(object):
             size = popenArgs['size320']
             self.process_length = self._size_to_seconds(size, 320)
 
-            self.popen_handler.stdin.write('get_percent_pos\n')  # 导致无法暂停
             while True:
                 if self.playing_flag is False:
                     break
 
                 output = self.popen_handler.stdout.readline()
-                # 当前进度:A:  11.9 (11.9) of 270.6 (04:30.6)  0.5% 60%
-                # TODO:'A:'不一定指进度
-                if 'A:' in output:
-                    second = output.split('A:', 2)[1].split('(', 2)[0].strip()
+                if 'ANS_TIME_POSITION' in output:
+                    second = output.split('=')[1].strip()
                     # 当前歌曲播放完了
                     # if second == '100':
                     #     self.popen_handler.stdin.write('quit\n')
                     #     self.popen_handler.kill()
                     #     break
                     self.process_location = int(float(second))
-                    self.popen_handler.stdin.write('get_percent_pos\n')  # 导致无法暂停
-                    time.sleep(0.1)
+                self.popen_handler.stdin.write('get_time_pos\n')  # 导致无法暂停
 
             if self.playing_flag:
                 self.next_idx()
@@ -466,5 +462,18 @@ if __name__ == '__main__':
                                      stdin=subprocess.PIPE,
                                      stdout=subprocess.PIPE,
                                      stderr=subprocess.PIPE)
+    popen_handler.stdin.write('get_time_pos\n')  # 导致无法暂停
     while True:
-        time.sleep(1)
+        output = popen_handler.stdout.readline()
+        print(output)
+        if 'ANS_TIME_POSITION' in output:
+            second = output.split('=')[1].strip()
+            # 当前歌曲播放完了
+            # if second == '100':
+            #     self.popen_handler.stdin.write('quit\n')
+            #     self.popen_handler.kill()
+            #     break
+            process_location = int(float(second))
+            print(process_location)
+        popen_handler.stdin.write('get_time_pos\n')  # 导致无法暂停
+        # time.sleep(0.1)
