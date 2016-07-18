@@ -414,7 +414,7 @@ class NetEase(object):
 
     # 歌手单曲
     def artists(self, singermid):
-        # TODO:pagination
+        # TODO:pagination/sorting
         action = "http://i.y.qq.com/v8/fcg-bin/fcg_v8_singer_track_cp.fcg?g_tk=938407465&format=jsonp&inCharset=GB2312&outCharset=utf-8&notice=0" \
                  "&platform=yqq&jsonpCallback=MusicJsonCallback&needNewCode=0" \
                  "&singermid={singermid}&order=listen&begin=0&num=100&songstatus=1".format(singermid=singermid)
@@ -424,7 +424,7 @@ class NetEase(object):
                 'Referer'] = 'http://i.y.qq.com/v8/fcg-bin/fcg_v8_singer_detail_cp.fcg?tpl=20&singermid={singermid}'.format(
                 singermid=singermid)
             resp = self.session.request('GET', action, headers=headers)
-            json_body = resp.text.split('(', 1)[1].strip(')')
+            json_body = resp.text.split('(', 1)[1].strip(')')  # 歌名中有可能包含圆括号
             data = json.loads(json_body)
             if data['code'] != 0:
                 log.error("Response invalid:" + action)
@@ -437,11 +437,18 @@ class NetEase(object):
             return []
 
     # album id --> song id set
-    def album(self, album_id):
-        action = 'http://music.163.com/api/album/{}'.format(album_id)
+    def album(self, albummid):
+        action = "http://i.y.qq.com/v8/fcg-bin/fcg_v8_album_detail_cp.fcg?tpl=20&albummid={albummid}&play=0".format(
+            albummid=albummid)
         try:
-            data = self.httpRequest('GET', action)
-            return data['album']['songs']
+            resp = self.session.request('GET', action, headers=self.header)
+            html = resp.content
+            inits = re.findall('init\(\{([\s\S]+)\}\);', html)
+            for init in inits:
+                if 'albummid' in init:
+                    data = json.loads(init)
+            # TODO:get songs in album
+            print(data)
         except requests.exceptions.RequestException as e:
             log.error(e)
             return []
@@ -491,8 +498,7 @@ class NetEase(object):
             song_data = song_data[0]
             song_data = json.loads(song_data)
         if not song_data:
-            # print("Cannot retrieve song info")  # TODO:empty info
-            # print("Resp is " + resp.content)
+            log.error('Cannot retrieve song info:' + song_id)  # TODO:empty info
             return {}
 
         song_data['singername'] = song_data['singer'][0]['name']  # TODO:multiple singers?
@@ -606,9 +612,9 @@ class NetEase(object):
         elif dig_type == 'albums':
             for i in range(0, len(data)):
                 albums_info = {
-                    'album_id': data[i]['id'],
+                    'album_id': data[i]['mid'],
                     'albums_name': data[i]['name'],
-                    'artists_name': data[i]['singername']['name']
+                    'artists_name': data[i]['singer']
                 }
                 temp.append(albums_info)
 
@@ -656,7 +662,8 @@ if __name__ == '__main__':
     # print ne.get_stream_url('00309Hdu17kB1T')
     # print ne.top_songlist(0)
     # print(ne.search('陈奕迅', 'singers'))
-    print(ne.artists('003Nz2So3XXYek'))
+    # print(ne.artists('003Nz2So3XXYek'))
+    print(ne.album('003rytri2FHG3V'))
     # print ne.song_info('00309Hdu17kB1T')['singername']
     # print ne.song_lyric('00309Hdu17kB1T')
     # print ne.dig_info(ne.top_songlist(0),'songs')
