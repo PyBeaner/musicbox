@@ -59,9 +59,6 @@ class Player(object):
             elif 'mp3_url' in popenArgs:
                 stream_url = popenArgs['mp3_url']
             else:
-                stream_url = ''
-
-            if not stream_url:
                 self.next_idx()
                 onExit()
                 return
@@ -91,8 +88,9 @@ class Player(object):
                         self.popen_handler.stdin.write('quit\n')
                         self.popen_handler.kill()
                         break
-                time.sleep(0.01)
-                self.popen_handler.stdin.write('get_time_pos\n')  # 导致无法暂停
+                # TODO: 无法暂停/时间延迟
+                time.sleep(0.02)
+                self.popen_handler.stdin.write('get_time_pos\n')
 
             if self.playing_flag:
                 self.next_idx()

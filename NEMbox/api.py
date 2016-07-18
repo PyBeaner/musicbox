@@ -417,7 +417,7 @@ class NetEase(object):
         # TODO:pagination
         action = "http://i.y.qq.com/v8/fcg-bin/fcg_v8_singer_track_cp.fcg?g_tk=938407465&format=jsonp&inCharset=GB2312&outCharset=utf-8&notice=0" \
                  "&platform=yqq&jsonpCallback=MusicJsonCallback&needNewCode=0" \
-                 "&singermid={singermid}&order=listen&begin=0&num=15&songstatus=1".format(singermid=singermid)
+                 "&singermid={singermid}&order=listen&begin=0&num=100&songstatus=1".format(singermid=singermid)
         try:
             headers = self.session.headers
             headers[
