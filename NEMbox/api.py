@@ -588,6 +588,7 @@ class NetEase(object):
             for i in range(0, len(data)):
                 song_info = data[i]
                 song_info['quality'] = ''  # TODO:quality
+                song_info['singername'] = song_info['singer'][0]['name']
                 temp.append(song_info)
 
         elif dig_type == 'artists':

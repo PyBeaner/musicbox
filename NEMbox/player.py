@@ -85,7 +85,7 @@ class Player(object):
 
                 output = self.popen_handler.stdout.readline()
                 if 'ANS_TIME_POSITION' in output:
-                    self.process_location = int(output.split('=')[1].strip())
+                    self.process_location = int(float(output.split('=')[1].strip()))
                     # 当前歌曲播放完了
                     if self.process_location >= self.process_length:
                         self.popen_handler.stdin.write('quit\n')
