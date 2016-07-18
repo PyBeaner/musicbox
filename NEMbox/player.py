@@ -87,13 +87,13 @@ class Player(object):
 
                 output = self.popen_handler.stdout.readline()
                 if 'ANS_TIME_POSITION' in output:
-                    second = output.split('=')[1].strip()
+                    self.process_location = int(output.split('=')[1].strip())
                     # 当前歌曲播放完了
-                    # if second == '100':
-                    #     self.popen_handler.stdin.write('quit\n')
-                    #     self.popen_handler.kill()
-                    #     break
-                    self.process_location = int(float(second))
+                    if self.process_location >= self.process_length:
+                        self.popen_handler.stdin.write('quit\n')
+                        self.popen_handler.kill()
+                        break
+                time.sleep(0.1)
                 self.popen_handler.stdin.write('get_time_pos\n')  # 导致无法暂停
 
             if self.playing_flag:
@@ -455,7 +455,6 @@ class Player(object):
 
 
 if __name__ == '__main__':
-    print(Player._size_to_seconds(11319601, 320))
     stream_url = get_stream_url("00309Hdu17kB1T")
     para = ['mplayer', '-slave', '-input', 'file=/tmp/mplayer.fifo', stream_url]
     popen_handler = subprocess.Popen(para,
@@ -463,17 +462,12 @@ if __name__ == '__main__':
                                      stdout=subprocess.PIPE,
                                      stderr=subprocess.PIPE)
     popen_handler.stdin.write('get_time_pos\n')  # 导致无法暂停
+    f = open('output.log', 'a')
     while True:
         output = popen_handler.stdout.readline()
-        print(output)
+        f.write(output)
         if 'ANS_TIME_POSITION' in output:
             second = output.split('=')[1].strip()
-            # 当前歌曲播放完了
-            # if second == '100':
-            #     self.popen_handler.stdin.write('quit\n')
-            #     self.popen_handler.kill()
-            #     break
             process_location = int(float(second))
-            print(process_location)
         popen_handler.stdin.write('get_time_pos\n')  # 导致无法暂停
-        # time.sleep(0.1)
+        time.sleep(0.1)
