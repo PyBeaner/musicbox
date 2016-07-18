@@ -413,11 +413,25 @@ class NetEase(object):
             return []
 
     # 歌手单曲
-    def artists(self, artist_id):
-        action = 'http://music.163.com/api/artist/{}'.format(artist_id)
+    def artists(self, singermid):
+        # TODO:pagination
+        action = "http://i.y.qq.com/v8/fcg-bin/fcg_v8_singer_track_cp.fcg?g_tk=938407465&format=jsonp&inCharset=GB2312&outCharset=utf-8&notice=0" \
+                 "&platform=yqq&jsonpCallback=MusicJsonCallback&needNewCode=0" \
+                 "&singermid={singermid}&order=listen&begin=0&num=15&songstatus=1".format(singermid=singermid)
         try:
-            data = self.httpRequest('GET', action)
-            return data['hotSongs']
+            headers = self.session.headers
+            headers[
+                'Referer'] = 'http://i.y.qq.com/v8/fcg-bin/fcg_v8_singer_detail_cp.fcg?tpl=20&singermid={singermid}'.format(
+                singermid=singermid)
+            resp = self.session.request('GET', action, headers=headers)
+            json_body = resp.text.split('(', 1)[1].strip(')')
+            data = json.loads(json_body)
+            if data['code'] != 0:
+                log.error("Response invalid:" + action)
+                return []
+            data = data['data']['list']
+            songs = [song['musicData'] for song in data]
+            return songs
         except requests.exceptions.RequestException as e:
             log.error(e)
             return []
@@ -580,7 +594,7 @@ class NetEase(object):
             artists = []
             for artist_basic_info in data:
                 artist_info = {
-                    'artist_id': artist_basic_info['id'],
+                    'artist_id': artist_basic_info['mid'],
                     'artists_name': artist_basic_info['singer'],
                     'alias': ''  # TODO:alias
                 }
@@ -640,7 +654,8 @@ if __name__ == '__main__':
     # print geturl_new_api(ne.songs_detail([27902910])[0])  # MD 128k, fallback
     # print ne.get_stream_url('00309Hdu17kB1T')
     # print ne.top_songlist(0)
-    print(ne.search('陈奕迅', 'singers'))
+    # print(ne.search('陈奕迅', 'singers'))
+    print(ne.artists('003Nz2So3XXYek'))
     # print ne.song_info('00309Hdu17kB1T')['singername']
     # print ne.song_lyric('00309Hdu17kB1T')
     # print ne.dig_info(ne.top_songlist(0),'songs')
