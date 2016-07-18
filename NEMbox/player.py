@@ -54,8 +54,6 @@ class Player(object):
         '''
 
         def runInThread(onExit, popenArgs):
-            # para = ['mpg123', '-R']
-            # para[1:1] = self.mpg123_parameters
             if 'cache' in popenArgs:
                 stream_url = popenArgs['cache']
             elif 'mp3_url' in popenArgs:
@@ -93,7 +91,7 @@ class Player(object):
                         self.popen_handler.stdin.write('quit\n')
                         self.popen_handler.kill()
                         break
-                time.sleep(0.1)
+                time.sleep(0.01)
                 self.popen_handler.stdin.write('get_time_pos\n')  # 导致无法暂停
 
             if self.playing_flag:
@@ -470,4 +468,4 @@ if __name__ == '__main__':
             second = output.split('=')[1].strip()
             process_location = int(float(second))
         popen_handler.stdin.write('get_time_pos\n')  # 导致无法暂停
-        time.sleep(0.1)
+        time.sleep(0.01)

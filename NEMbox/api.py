@@ -310,12 +310,15 @@ class NetEase(object):
             return -1
 
     def search(self, key, stype='songs', offset=0, total='true', limit=60):
-        action = "http://i.y.qq.com/s.plcloud/fcgi-bin/smartbox_new.fcg?utf8=1&is_xml=0&key={key}" \
+        import urllib
+        action = "http://i.y.qq.com/s.plcloud/fcgi-bin/smartbox_new.fcg?utf8=1&is_xml=0&{key_query}" \
                  "&g_tk=1371149499&format=jsonp&inCharset=GB2312&outCharset=utf-8&notice=0&platform=yqq" \
-                 "&jsonpCallback=MusicJsonCallBack&needNewCode=0".format(key=key)
+                 "&jsonpCallback=MusicJsonCallBack&needNewCode=0".format(key_query=urllib.urlencode({'key': key}))
         resp = self.session.get(action)
         json_body = resp.text.split('MusicJsonCallBack(')[1].strip(')')
         data = json.loads(json_body)['data']
+        if stype == 'artists':
+            stype = 'singers'
         stype = stype[:-1]  # 比如songs=>转成song
         result = data.get(stype, [])
         if not result:
@@ -575,13 +578,13 @@ class NetEase(object):
 
         elif dig_type == 'artists':
             artists = []
-            for i in range(0, len(data)):
-                artists_info = {
-                    'artist_id': data[i]['id'],
-                    'artists_name': data[i]['name'],
-                    'alias': ''.join(data[i]['alias'])
+            for artist_basic_info in data:
+                artist_info = {
+                    'artist_id': artist_basic_info['id'],
+                    'artists_name': artist_basic_info['singer'],
+                    'alias': ''  # TODO:alias
                 }
-                artists.append(artists_info)
+                artists.append(artist_info)
 
             return artists
 
@@ -635,9 +638,9 @@ class NetEase(object):
 if __name__ == '__main__':
     ne = NetEase()
     # print geturl_new_api(ne.songs_detail([27902910])[0])  # MD 128k, fallback
-    print ne.get_stream_url('00309Hdu17kB1T')
+    # print ne.get_stream_url('00309Hdu17kB1T')
     # print ne.top_songlist(0)
-    # print(ne.search('eason', 'songs'))
+    print(ne.search('陈奕迅', 'singers'))
     # print ne.song_info('00309Hdu17kB1T')['singername']
     # print ne.song_lyric('00309Hdu17kB1T')
     # print ne.dig_info(ne.top_songlist(0),'songs')

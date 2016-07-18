@@ -416,10 +416,12 @@ class Ui(object):
         search_key = self.get_param(prompt)
         if search_key == '/return':
             return []
-        else:
-            data = netease.search(search_key, stype=stype)
+
+        data = netease.search(search_key, stype=stype)
+        if stype == 'songs':
             data = [netease.song_info(song['mid']) for song in data]
-            return netease.dig_info(data, stype)
+            return data
+        return netease.dig_info(data, stype)
 
     def build_login(self):
         self.build_login_bar()
