@@ -591,7 +591,7 @@ class Menu(object):
         # 该专辑包含的歌曲
         elif datatype == 'albums':
             album_id = datalist[idx]['album_id']
-            songs = netease.album(album_id)
+            songs = netease.album_songs(album_id)
             self.datatype = 'songs'
             self.datalist = netease.dig_info(songs, 'songs')
             self.title += ' > ' + datalist[idx]['albums_name']

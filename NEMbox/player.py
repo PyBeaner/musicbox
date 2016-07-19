@@ -118,11 +118,11 @@ class Player(object):
         def gettLyric():
             if 'tlyric' not in self.songs[str(self.playing_id)].keys():
                 self.songs[str(self.playing_id)]['tlyric'] = []
-            if len(self.songs[str(self.playing_id)]['tlyric']) > 0:
+            if self.songs[str(self.playing_id)]['tlyric']:
                 return
             netease = NetEase()
             tlyric = netease.song_tlyric(self.playing_id)
-            if tlyric == [] or tlyric == '未找到歌词翻译':
+            if not tlyric:
                 return
             tlyric = tlyric.split('\n')
             self.songs[str(self.playing_id)]['tlyric'] = tlyric

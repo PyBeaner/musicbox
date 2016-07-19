@@ -437,7 +437,7 @@ class NetEase(object):
             return []
 
     # album id --> songs
-    def album(self, albummid):
+    def album_songs(self, albummid):
         action = "http://i.y.qq.com/v8/fcg-bin/fcg_v8_album_detail_cp.fcg?tpl=20&albummid={albummid}&play=0".format(
             albummid=albummid)
         try:
@@ -529,19 +529,7 @@ class NetEase(object):
             return []
 
     def song_tlyric(self, music_id):
-        return []  # TODO:lyric translation
-        action = 'http://music.163.com/api/song/lyric?os=osx&id={}&lv=-1&kv=-1&tv=-1'.format(  # NOQA
-                                                                                               music_id)
-        try:
-            data = self.httpRequest('GET', action)
-            if 'tlyric' in data and data['tlyric']['lyric'] is not None:
-                lyric_info = data['tlyric']['lyric'][1:]
-            else:
-                lyric_info = '未找到歌词翻译'
-            return lyric_info
-        except requests.exceptions.RequestException as e:
-            log.error(e)
-            return []
+        pass  # TODO:lyric translation
 
     # 今日最热（0）, 本周最热（10），历史最热（20），最新节目（30）
     def djchannels(self, stype=0, offset=0, limit=50):
@@ -578,7 +566,8 @@ class NetEase(object):
         return channels
 
     # 获取版本
-    def get_version(self):
+    @staticmethod
+    def get_version():
         action = 'https://pypi.python.org/pypi?:action=doap&name=NetEase-MusicBox'  # NOQA
         try:
             data = requests.get(action)
@@ -662,7 +651,7 @@ if __name__ == '__main__':
     # print ne.top_songlist(0)
     # print(ne.search('陈奕迅', 'singers'))
     # print(ne.artists('003Nz2So3XXYek'))
-    print(ne.album('003rytri2FHG3V'))
+    print(ne.album_songs('003rytri2FHG3V'))
     # print ne.song_info('00309Hdu17kB1T')['singername']
     # print ne.song_lyric('00309Hdu17kB1T')
     # print ne.dig_info(ne.top_songlist(0),'songs')
