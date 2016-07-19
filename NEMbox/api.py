@@ -338,18 +338,19 @@ class NetEase(object):
 
     # 歌单（网友精选碟） hot||new http://music.163.com/#/discover/playlist/
     def top_playlists(self, category='全部', order='hot', offset=0, limit=50):
-        action = 'http://music.163.com/api/playlist/list?cat={}&order={}&offset={}&total={}&limit={}'.format(  # NOQA
-                                                                                                               category,
-                                                                                                               order,
-                                                                                                               offset,
-                                                                                                               'true' if offset else 'false',
-                                                                                                               limit)  # NOQA
-        try:
-            data = self.httpRequest('GET', action)
-            return data['playlists']
-        except requests.exceptions.RequestException as e:
-            log.error(e)
+        # TODO:category/sort/pagination
+        action = "http://i.y.qq.com/s.plcloud/fcgi-bin/fcg_get_diss_by_tag.fcg?categoryId=10000000&sortId=1&sin=20&ein=39&format=jsonp&g_tk=938407465" \
+                 "&format=jsonp&inCharset=GB2312&outCharset=utf-8&notice=0&platform=yqq&jsonpCallback=MusicJsonCallback&needNewCode=0"
+        headers = self.header
+        headers['Referer'] = 'http://y.qq.com/y/static/taoge/taoge_list.html?pgv_ref=qqmusic.y.topmenu'
+        resp = self.session.request('GET', action, headers=headers)
+        json_body = resp.text.split('MusicJsonCallback(')[1].strip(')')
+        data = json.loads(json_body)
+        if data['code'] != 0:
+            log.error('Failed to get recommend_playlist'+json_body)
             return []
+        playlist = data['data']['list']
+        return playlist
 
     # 分类歌单
     def playlist_classes(self):
@@ -609,9 +610,9 @@ class NetEase(object):
         elif dig_type == 'top_playlists':
             for i in range(0, len(data)):
                 playlists_info = {
-                    'playlist_id': data[i]['id'],
-                    'playlists_name': data[i]['name'],
-                    'creator_name': data[i]['creator']['nickname']
+                    'playlist_id': data[i]['dissid'],
+                    'playlists_name': data[i]['dissname'],
+                    'creator_name': data[i]['creator']['name']
                 }
                 temp.append(playlists_info)
 
@@ -651,7 +652,8 @@ if __name__ == '__main__':
     # print ne.top_songlist(0)
     # print(ne.search('陈奕迅', 'singers'))
     # print(ne.artists('003Nz2So3XXYek'))
-    print(ne.album_songs('003rytri2FHG3V'))
+    # print(ne.album_songs('003rytri2FHG3V'))
+    print(ne.top_playlists())
     # print ne.song_info('00309Hdu17kB1T')['singername']
     # print ne.song_lyric('00309Hdu17kB1T')
     # print ne.dig_info(ne.top_songlist(0),'songs')

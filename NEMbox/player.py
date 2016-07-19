@@ -89,9 +89,10 @@ class Player(object):
                         self.popen_handler.kill()
                         break
 
+                # TODO:每隔40秒左右会自动暂停
                 # 如果暂停了：不需要再get_time_pos,否则导致无法暂停
                 if self.pause_flag:
-                    time.sleep(0.1)
+                    # time.sleep(0.1)
                     continue
                 else:
                     # 这里不要sleep，否则导致时间变慢

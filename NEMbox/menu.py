@@ -624,8 +624,7 @@ class Menu(object):
             # 子类别
             data = self.datalist[idx]
             self.datatype = 'top_playlists'
-            self.datalist = netease.dig_info(
-                netease.top_playlists(data), self.datatype)
+            self.datalist = netease.dig_info(netease.top_playlists(data), self.datatype)
             self.title += ' > ' + data
 
         # 歌曲榜单
