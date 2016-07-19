@@ -436,19 +436,18 @@ class NetEase(object):
             log.error(e)
             return []
 
-    # album id --> song id set
+    # album id --> songs
     def album(self, albummid):
         action = "http://i.y.qq.com/v8/fcg-bin/fcg_v8_album_detail_cp.fcg?tpl=20&albummid={albummid}&play=0".format(
             albummid=albummid)
         try:
             resp = self.session.request('GET', action, headers=self.header)
             html = resp.content
-            inits = re.findall('init\(\{([\s\S]+)\}\);', html)
+            inits = re.findall('songList\s?:\s?([\s\S]+),\s+cdNum', html)
             for init in inits:
-                if 'albummid' in init:
-                    data = json.loads(init)
-            # TODO:get songs in album
-            print(data)
+                data = json.loads(init)
+                return [self.song_info(song['songmid']) for song in data]
+            return []
         except requests.exceptions.RequestException as e:
             log.error(e)
             return []
