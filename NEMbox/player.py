@@ -243,7 +243,8 @@ class Player(object):
         self.recall()
 
     def stop(self):
-        if self.playing_flag and self.popen_handler:
+        # 'poll' returns None means not terminated
+        if self.playing_flag and self.popen_handler and not self.popen_handler.poll():
             self.playing_flag = False
             self.popen_handler.stdin.write('quit\n')  # Quit
             try:

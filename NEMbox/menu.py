@@ -139,7 +139,8 @@ class Menu(object):
         curses.endwin()
         sys.exit()
 
-    def update_alert(self, version):
+    @staticmethod
+    def update_alert(version):
         latest = Menu().check_version()
         if latest != version and latest != 0:
             notify('MusicBox Update is available', 1)
@@ -150,15 +151,14 @@ class Menu(object):
     def check_version(self):
         # 检查更新 && 签到
         try:
-            mobilesignin = self.netease.daily_signin(0)
-            if mobilesignin != -1 and mobilesignin['code'] != -2:
-                notify('Mobile signin success', 1)
-            time.sleep(0.5)
-            pcsignin = self.netease.daily_signin(1)
-            if pcsignin != -1 and pcsignin['code'] != -2:
-                notify('PC signin success', 1)
-            tree = ET.ElementTree(ET.fromstring(str(self.netease.get_version(
-            ))))
+            # mobilesignin = self.netease.daily_signin(0)
+            # if mobilesignin != -1 and mobilesignin['code'] != -2:
+            #     notify('Mobile signin success', 1)
+            # time.sleep(0.5)
+            # pcsignin = self.netease.daily_signin(1)
+            # if pcsignin != -1 and pcsignin['code'] != -2:
+            #     notify('PC signin success', 1)
+            tree = ET.ElementTree(ET.fromstring(str(self.netease.get_version())))
             root = tree.getroot()
             return root[0][4][0][0].text
         except TypeError as e:
@@ -583,7 +583,7 @@ class Menu(object):
         # 该艺术家的热门歌曲
         elif datatype == 'artists':
             artist_id = datalist[idx]['artist_id']
-            songs = netease.artists(artist_id)
+            songs = netease.singer_songs(artist_id)
             self.datatype = 'songs'
             self.datalist = netease.dig_info(songs, 'songs')
             self.title += ' > ' + datalist[idx]['artists_name']

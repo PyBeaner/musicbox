@@ -413,7 +413,7 @@ class NetEase(object):
             return []
 
     # 歌手单曲
-    def artists(self, singermid):
+    def singer_songs(self, singermid):
         # TODO:pagination/sorting
         action = "http://i.y.qq.com/v8/fcg-bin/fcg_v8_singer_track_cp.fcg?g_tk=938407465&format=jsonp&inCharset=GB2312&outCharset=utf-8&notice=0" \
                  "&platform=yqq&jsonpCallback=MusicJsonCallback&needNewCode=0" \
