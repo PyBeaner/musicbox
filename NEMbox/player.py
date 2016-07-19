@@ -88,9 +88,14 @@ class Player(object):
                         self.popen_handler.stdin.write('quit\n')
                         self.popen_handler.kill()
                         break
-                # TODO: 无法暂停/时间延迟
-                time.sleep(0.02)
-                self.popen_handler.stdin.write('get_time_pos\n')
+
+                # 如果暂停了：不需要再get_time_pos,否则导致无法暂停
+                if self.pause_flag:
+                    time.sleep(0.1)
+                    continue
+                else:
+                    # 这里不要sleep，否则导致时间变慢
+                    self.popen_handler.stdin.write('get_time_pos\n')
 
             if self.playing_flag:
                 self.next_idx()
